@@ -1,12 +1,3 @@
-// // This is needed to get async/await working with "chrome.runtime.onMessage.addListener". Chrome still doesn't support Promise in the returned value of onMessage listener both in ManifestV3 and V2. This code is from StackOverflow: https://stackoverflow.com/questions/53024819/sendresponse-not-waiting-for-async-function-or-promises-resolve
-// const {onMessage} = chrome.runtime, {addListener} = onMessage; 
-// onMessage.addListener = fn => addListener.call(onMessage, (msg, sender, respond) => {
-//     const res = fn(msg, sender, respond);
-//     if (res instanceof Promise) return !!res.then(respond, console.error);
-//     if (res !== undefined) respond(res);
-// });
-
-
 let readyTabs = new Set()
 let currentVideoBookmarks = null
 
@@ -39,6 +30,7 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
     }
 })
 
+// Chrome sadly has this weird system for sending responses back with async/await functions so the only way I got this to properly work was doing it this way by passing in "sendResponse". Got this idea from a StackOverflow answer here: https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
 const getCurrentVideoBookmarks = async (sendResponse) => {
     const activeTab = await getActiveTabURL()
     const tabId = activeTab.id

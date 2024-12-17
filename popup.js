@@ -45,6 +45,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     const bookmarkTitleElement = document.createElement("div")
     const controlsElement = document.createElement("div")
     const newBookmarkElement = document.createElement("div")
+    const newBookmarkBottomWrapperElement = document.createElement("div")
     const imgElement = document.createElement('img')
 
     bookmarkTitleElement.textContent = formatTime(bookmark.time)
@@ -65,11 +66,14 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     }, controlsElement)
 
     newBookmarkElement.id = 'bookmark-' + bookmark.time
-    newBookmarkElement.className = "bookmark"
+    newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper"
+
+    newBookmarkBottomWrapperElement.appendChild(imgElement)
+    newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement)
+    newBookmarkBottomWrapperElement.appendChild(controlsElement)
 
     newBookmarkElement.appendChild(imgElement)
-    newBookmarkElement.appendChild(bookmarkTitleElement)
-    newBookmarkElement.appendChild(controlsElement)
+    newBookmarkElement.appendChild(newBookmarkBottomWrapperElement)
     
     bookmarkListElem.appendChild(newBookmarkElement)
 }

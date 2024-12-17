@@ -26,12 +26,11 @@
     padding: 3px;
   }
   
-  .bookmark {
+  .bookmark-bottom-wrapper {
     display: flex;
     border-bottom-color: #00254d;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-radius: 0.8rem;
     padding: 3px;
     padding-bottom: 7px;
     margin-bottom: 7px;
@@ -50,4 +49,8 @@
   .bookmark-controls {
     flex: auto;
     text-align: right;
+  }
+
+  img {
+    width: 100%;
   }
