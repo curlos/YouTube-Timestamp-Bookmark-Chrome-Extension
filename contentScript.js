@@ -2,7 +2,7 @@ chrome.runtime.sendMessage({status: "ready"});
 
 let youtubeLeftControls = null;
 let youtubePlayer = null;
-let currentVideo = ""
+let currentVideoId = ""
 let currentVideoBookmarks = []
 
 /**
@@ -10,8 +10,8 @@ let currentVideoBookmarks = []
  * @returns {Array<Object>}
  */
 const fetchBookmarks = async () => {
-    const obj = await chrome.storage.sync.get(currentVideo)
-    return obj[currentVideo] ? JSON.parse(obj[currentVideo]) : []
+    const obj = await chrome.storage.sync.get(currentVideoId)
+    return obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : []
 }
 
 /**
@@ -21,7 +21,6 @@ const handleAddNewBookmark = async () => {
     const currentTime = youtubePlayer.currentTime
     const newBookmark = {
         time: Math.floor(currentTime),
-        desc: `Bookmark at ${getTime(currentTime)}`
     }
 
     currentVideoBookmarks = await fetchBookmarks()
@@ -29,7 +28,7 @@ const handleAddNewBookmark = async () => {
     const newCurrentVideoBookmarks = JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time))
 
     await chrome.storage.sync.set({
-        [currentVideo]: newCurrentVideoBookmarks
+        [currentVideoId]: newCurrentVideoBookmarks
     })
 
     await chrome.runtime.sendMessage({ action: "open-popup" });
@@ -57,34 +56,37 @@ const newVideoLoaded = async () => {
     }
 }
 
-chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
+chrome.runtime.onMessage.addListener(async (obj) => {
     const { type, value, videoId } = obj
 
     switch(type) {
         case "tab-updated-new-video":
-            currentVideo = videoId
+            currentVideoId = videoId
             await newVideoLoaded()
             break
-        case "PLAY":
+        case "play-new-timestamp-in-video":
             youtubePlayer.currentTime = value
+
+            // Once we go to that time in the video, show the timestamp progress bar for a second before hiding it again.
+            const html5VideoPlayerElem = document.querySelector('.html5-video-player')
+            html5VideoPlayerElem.classList.remove("ytp-autohide")
+
+            setTimeout(() => {
+                html5VideoPlayerElem.classList.add("ytp-autohide")
+            }, 1000)
+
             break
-        case "DELETE":
+        case "delete-bookmark":
             currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== value)
             await chrome.storage.sync.set({
-                [currentVideo]: JSON.stringify(currentVideoBookmarks)
+                [currentVideoId]: JSON.stringify(currentVideoBookmarks)
             })
-            response(currentVideoBookmarks)
             break
     }
 })
 
-const testingStart = async () => {
-    newVideoLoaded()
-
-    // chrome.storage.sync.clear()
-}
-
-testingStart()
+// TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
+newVideoLoaded()
 
 const getTime = (t) => {
     const date = new Date(0)

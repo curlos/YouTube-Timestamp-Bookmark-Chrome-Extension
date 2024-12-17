@@ -1,4 +1,4 @@
-import { getActiveTabURL } from './utils.js'
+import { getActiveTabURL, formatTime, captureThumbnail } from './utils.js'
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
@@ -14,14 +14,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = await chrome.storage.sync.get(currentVideoId)
         const currentVideoBookmarks = data[currentVideoId] ? JSON.parse(data[currentVideoId]) : []
         
-        renderElemBookmarks(currentVideoBookmarks)
+        await renderElemBookmarks(currentVideoBookmarks)
     } else {
         const container = document.getElementsByClassName("container")[0]
         container.innerHTML = '<div class="title">This is not a YouTube video page.</div>'
     }
 })
 
-const renderElemBookmarks = (currentVideoBookmarks = []) => {
+const renderElemBookmarks = async (currentVideoBookmarks = []) => {
     const bookmarkListElem = document.getElementById("bookmarks")
     bookmarkListElem.innerHTML = ""
 
@@ -31,18 +31,24 @@ const renderElemBookmarks = (currentVideoBookmarks = []) => {
     }
 
     for (let bookmark of currentVideoBookmarks) {
-        addNewBookmarkElem(bookmarkListElem, bookmark)
+        await addNewBookmarkElem(bookmarkListElem, bookmark)
     }
 }
 
-const addNewBookmarkElem = (bookmarkListElem, bookmark) => {
+const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     const bookmarkTitleElement = document.createElement("div")
     const controlsElement = document.createElement("div")
     const newBookmarkElement = document.createElement("div")
 
-    bookmarkTitleElement.textContent = bookmark.desc
+    bookmarkTitleElement.textContent = formatTime(bookmark.time)
     bookmarkTitleElement.className = "bookmark-title"
     controlsElement.className = "bookmark-controls"
+
+    // const videoElem = document.querySelector('video')
+
+    // const thumbnail = await captureThumbnail(videoElem.src, bookmark.time)
+
+    // console.log(thumbnail)
 
     setBookmarkAttributes("play", () => {
         onPlay(bookmark.time)
@@ -73,7 +79,7 @@ const onPlay = async (bookmarkTime) => {
     const activeTab = await getActiveTabURL()
 
     chrome.tabs.sendMessage(activeTab.id, {
-        type: "PLAY",
+        type: "play-new-timestamp-in-video",
         value: bookmarkTime
     })
 }
@@ -84,12 +90,10 @@ const onDelete = async (bookmarkTime) => {
         "bookmark-" + bookmarkTime
     )
 
-    debugger
-
     bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete)
 
     chrome.tabs.sendMessage(activeTab.id, {
-        type: "DELETE",
+        type: "delete-bookmark",
         value: bookmarkTime
-    }, renderElemBookmarks)
+    })
 }

@@ -1,8 +1,6 @@
 let readyTabs = new Set()
 
 chrome.runtime.onMessage.addListener(function(message, sender) {
-    console.log(message)
-
     if (message.status === "ready" && sender.tab) {
       readyTabs.add(sender.tab.id);
     } else if (message.action === "open-popup") {
