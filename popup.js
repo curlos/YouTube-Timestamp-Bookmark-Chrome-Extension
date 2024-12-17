@@ -1,25 +1,31 @@
-import { getActiveTabURL, formatTime, captureThumbnail } from './utils.js'
+import { getActiveTabURL, formatTime } from './utils.js'
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
  */
-document.addEventListener("DOMContentLoaded", async () => {
-    const activeTab = await getActiveTabURL()
-    const queryParams = activeTab.url.split("?")[1]
-    const urlParams = new URLSearchParams(queryParams)
+document.onreadystatechange = async () => {
+    if (document.readyState === 'complete') {
+        const activeTab = await getActiveTabURL()
+        const queryParams = activeTab.url.split("?")[1]
+        const urlParams = new URLSearchParams(queryParams)
 
-    const currentVideoId = urlParams.get("v")
+        const currentVideoId = urlParams.get("v")
 
-    if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
-        const data = await chrome.storage.sync.get(currentVideoId)
-        const currentVideoBookmarks = data[currentVideoId] ? JSON.parse(data[currentVideoId]) : []
-        
-        await renderElemBookmarks(currentVideoBookmarks)
-    } else {
-        const container = document.getElementsByClassName("container")[0]
-        container.innerHTML = '<div class="title">This is not a YouTube video page.</div>'
+        if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
+            chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" },
+                (currentVideoBookmarks) => {
+                    console.log("Bookmarks for this video:")
+                    console.log(currentVideoBookmarks)
+                    
+                    renderElemBookmarks(currentVideoBookmarks)
+                }
+            )
+        } else {
+            const container = document.getElementsByClassName("container")[0]
+            container.innerHTML = '<div class="title">This is not a YouTube video page.</div>'
+        }
     }
-})
+}
 
 const renderElemBookmarks = async (currentVideoBookmarks = []) => {
     const bookmarkListElem = document.getElementById("bookmarks")
@@ -39,16 +45,17 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     const bookmarkTitleElement = document.createElement("div")
     const controlsElement = document.createElement("div")
     const newBookmarkElement = document.createElement("div")
+    const imgElement = document.createElement('img')
 
     bookmarkTitleElement.textContent = formatTime(bookmark.time)
     bookmarkTitleElement.className = "bookmark-title"
     controlsElement.className = "bookmark-controls"
 
-    // const videoElem = document.querySelector('video')
-
     // const thumbnail = await captureThumbnail(videoElem.src, bookmark.time)
 
     // console.log(thumbnail)
+
+    imgElement.src = bookmark.dataUrl
 
     setBookmarkAttributes("play", () => {
         onPlay(bookmark.time)
@@ -60,6 +67,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     newBookmarkElement.id = 'bookmark-' + bookmark.time
     newBookmarkElement.className = "bookmark"
 
+    newBookmarkElement.appendChild(imgElement)
     newBookmarkElement.appendChild(bookmarkTitleElement)
     newBookmarkElement.appendChild(controlsElement)
     
