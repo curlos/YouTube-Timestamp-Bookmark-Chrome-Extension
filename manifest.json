@@ -5,13 +5,13 @@
     "permissions": ["storage", "tabs"],
     "host_permissions": ["https://*.youtube.com/*"],
     "background": {
-      "service_worker": "background.js"
+      "service_worker": "js/background.js"
     },
     "content_scripts": [
       {
         "matches": ["https://*.youtube.com/*"],
-        "js": ["utils.js", "contentScript.js"],
-        "css": ["contentScript.css"]
+        "js": ["js/utils.js", "js/contentScript.js"],
+        "css": ["css/contentScript.css"]
       }
     ],
     "web_accessible_resources": [
