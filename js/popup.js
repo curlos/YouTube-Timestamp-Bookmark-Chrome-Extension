@@ -10,12 +10,8 @@ document.onreadystatechange = async () => {
         const currentVideoId = urlParams.get("v");
 
         if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
-            const bookmarkListElem = document.getElementById("bookmarks");
-            bookmarkListElem.innerHTML = ''
-            
-            const loadingSpinnerElem = document.createElement('div')
-            loadingSpinnerElem.className = 'loader'
-            bookmarkListElem.appendChild(loadingSpinnerElem)
+            renderLeftMenuButton()
+            renderSpinner()
 
             chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, (currentVideoBookmarks) => {
                 renderElemBookmarks(currentVideoBookmarks);
@@ -26,6 +22,24 @@ document.onreadystatechange = async () => {
         }
     }
 };
+
+const renderLeftMenuButton = () => {
+    const menuDiv = document.getElementById("menu-svg-wrapper");
+    menuDiv.innerHTML = getIconSVG("menu")
+    menuDiv.addEventListener('click', () => {
+        // TODO: Show the sidebar modal with the list of videos.
+        console.log('Click!')
+    })
+}
+
+const renderSpinner = () => {
+    const bookmarkListElem = document.getElementById("bookmarks");
+    bookmarkListElem.innerHTML = ''
+    
+    const loadingSpinnerElem = document.createElement('div')
+    loadingSpinnerElem.className = 'loader'
+    bookmarkListElem.appendChild(loadingSpinnerElem)
+}
 
 const renderElemBookmarks = async (currentVideoBookmarks = []) => {
     const bookmarkListElem = document.getElementById("bookmarks");
@@ -53,11 +67,11 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
 
     bookmarkTitleElement.textContent = formatTime(bookmark.time);
     bookmarkTitleElement.className = "bookmark-title";
+    bookmarkTitleElement.addEventListener('click', () => {
+        onPlay(bookmark.time)
+    })
+
     controlsElement.className = "bookmark-controls";
-
-    // const thumbnail = await captureThumbnail(videoElem.src, bookmark.time)
-
-    // console.log(thumbnail)
 
     timestampImgElement.src = bookmark.dataUrl;
     timestampImgElement.className = "timestamp-img";
@@ -100,6 +114,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
 const setControlBookmarkSVGElem = (name, eventListener, controlParentElement) => {
     const controlElement = document.createElement("div");
     controlElement.innerHTML = getIconSVG(name)
+    controlElement.className = "svg-wrapper"
     
     controlElement.addEventListener("click", eventListener);
     controlParentElement.appendChild(controlElement);
