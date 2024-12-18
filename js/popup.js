@@ -28,7 +28,7 @@ const renderLeftMenuButton = () => {
     menuDiv.innerHTML = getIconSVG("menu")
     menuDiv.addEventListener('click', () => {
         // TODO: Show the sidebar modal with the list of videos.
-        console.log('Click!')
+        document.querySelector('.sidebar-modal').classList.replace('sidebar-hidden', 'sidebar-shown');
     })
 }
 

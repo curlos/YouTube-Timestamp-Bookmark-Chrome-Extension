@@ -1,5 +1,7 @@
 html {
     background-color: rgb(50, 50, 50);
+    width: 280px;
+    overflow: none;
 }
 
 body {
@@ -36,6 +38,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 550px;
+    overflow: auto;
 }
 
 .bookmark-bottom-wrapper {
@@ -120,4 +124,43 @@ body {
 
 .top-bar {
     padding: 8px;
+}
+
+.sidebar-modal {
+    position: fixed; /* Ensures positioning within the popup */
+    top: 0;
+    left: -100%; /* Start hidden to the left */
+    width: 100%; /* Make width same as popup */
+    height: 100%; /* Make height same as popup */
+    background-color: #f4f4f4;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
+    transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
+}
+
+.sidebar-hidden {
+    left: -100%; /* Keeps the sidebar hidden to the left */
+}
+
+.sidebar-shown {
+    left: 0; /* Slides the sidebar into view */
+}
+
+.sidebar-content {
+    padding: 20px;
+}
+
+/* Styles applied within the .gray-scrollbar class context */
+.gray-scrollbar::-webkit-scrollbar {
+    width: 10px;
+}
+
+.gray-scrollbar::-webkit-scrollbar-thumb {
+    background: #919191;
+    border-radius: 5px;
+}
+
+/* Firefox and other standard property supporting browsers */
+.gray-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #919191 transparent;
 }
