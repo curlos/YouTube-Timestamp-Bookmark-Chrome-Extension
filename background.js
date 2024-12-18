@@ -23,6 +23,8 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
         const urlParameters = new URLSearchParams(queryParameters);
         const videoId = urlParameters.get("v");
 
+        currentVideoBookmarks = null
+
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
             videoId,
@@ -35,7 +37,7 @@ const getCurrentVideoBookmarks = async (sendResponse) => {
     const activeTab = await getActiveTabURL();
     const tabId = activeTab.id;
 
-    chrome.tabs.sendMessage(tabId, { type: "get-current-video-bookmarks-with-data-url" }, {}, (response) => {
+    chrome.tabs.sendMessage(tabId, { type: "get-current-video-bookmarks-with-data-url", currentVideoBookmarks }, {}, (response) => {
         currentVideoBookmarks = response;
 
         if (chrome.runtime.lastError) {

@@ -12,6 +12,13 @@ document.onreadystatechange = async () => {
         const currentVideoId = urlParams.get("v");
 
         if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
+            const bookmarkListElem = document.getElementById("bookmarks");
+            bookmarkListElem.innerHTML = ''
+            
+            const loadingSpinnerElem = document.createElement('div')
+            loadingSpinnerElem.className = 'loader'
+            bookmarkListElem.appendChild(loadingSpinnerElem)
+
             chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, (currentVideoBookmarks) => {
                 renderElemBookmarks(currentVideoBookmarks);
             });

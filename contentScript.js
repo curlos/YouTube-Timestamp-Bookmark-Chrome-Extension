@@ -34,13 +34,12 @@ const handleAddNewBookmark = async () => {
     };
 
     currentVideoBookmarks = await fetchBookmarks();
+    const newCurrentVideoBookmarks = [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)
 
-    const newCurrentVideoBookmarks = JSON.stringify(
-        [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time),
-    );
+    const newCurrentVideoBookmarksStr = JSON.stringify(newCurrentVideoBookmarks);
 
     await chrome.storage.sync.set({
-        [currentVideoId]: newCurrentVideoBookmarks,
+        [currentVideoId]: newCurrentVideoBookmarksStr,
     });
 
     await chrome.runtime.sendMessage({ type: "open-popup" });
@@ -103,11 +102,19 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             });
             break;
         case "get-current-video-bookmarks-with-data-url":
+            const { currentVideoBookmarks: backgroundCurrentVideoBookmarks } = obj
+
+            if (backgroundCurrentVideoBookmarks) {
+                return backgroundCurrentVideoBookmarks
+            }
+
             if (!videoElem) {
                 videoElem = document.getElementsByClassName("video-stream")[0];
             }
 
             const newCurrentVideoBookmarks = [];
+
+            console.log(currentVideoBookmarks)
 
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];

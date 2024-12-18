@@ -33,6 +33,9 @@ body {
 .bookmarks {
     margin: 5px 5px;
     padding: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .bookmark-bottom-wrapper {
@@ -66,11 +69,11 @@ body {
 }
 
 .loader {
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #3498db; /* Blue */
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #1b5fce; /* Blue */
     border-radius: 50%;
-    width: 120px;
-    height: 120px;
+    width: 60px;
+    height: 60px;
     animation: spin 2s linear infinite;
 }
 
