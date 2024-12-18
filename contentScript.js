@@ -64,7 +64,7 @@ const newVideoLoaded = async () => {
             bookmarkSvgContainer.title = "Click to bookmark current timestamp";
             bookmarkSvgContainer.addEventListener("click", handleAddNewBookmark);
 
-            bookmarkSvgContainer.innerHTML = 
+            bookmarkSvgContainer.innerHTML = getIconSVG('bookmark')
 
             youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
             youtubeLeftControls.appendChild(bookmarkSvgContainer);
