@@ -1,6 +1,15 @@
+html {
+  background-color: rgb(50, 50, 50);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
 .container {
     width: 280px;
-    color: #314d3e;
+    color: white;
   }
   
   .title {
@@ -28,7 +37,7 @@
   
   .bookmark-bottom-wrapper {
     display: flex;
-    border-bottom-color: #00254d;
+    border-bottom-color: white;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     padding: 3px;
@@ -51,6 +60,7 @@
     text-align: right;
   }
 
-  img {
+  .timestamp-img {
     width: 100%;
+    cursor: pointer;
   }

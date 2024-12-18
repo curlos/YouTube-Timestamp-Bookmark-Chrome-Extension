@@ -14,9 +14,6 @@ document.onreadystatechange = async () => {
         if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
             chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" },
                 (currentVideoBookmarks) => {
-                    console.log("Bookmarks for this video:")
-                    console.log(currentVideoBookmarks)
-                    
                     renderElemBookmarks(currentVideoBookmarks)
                 }
             )
@@ -46,7 +43,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     const controlsElement = document.createElement("div")
     const newBookmarkElement = document.createElement("div")
     const newBookmarkBottomWrapperElement = document.createElement("div")
-    const imgElement = document.createElement('img')
+    const timestampImgElement = document.createElement('img')
 
     bookmarkTitleElement.textContent = formatTime(bookmark.time)
     bookmarkTitleElement.className = "bookmark-title"
@@ -56,7 +53,11 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
 
     // console.log(thumbnail)
 
-    imgElement.src = bookmark.dataUrl
+    timestampImgElement.src = bookmark.dataUrl
+    timestampImgElement.className = 'timestamp-img'
+    timestampImgElement.addEventListener('click', () => {
+        onPlay(bookmark.time)
+    })
 
     setBookmarkAttributes("play", () => {
         onPlay(bookmark.time)
@@ -68,11 +69,11 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     newBookmarkElement.id = 'bookmark-' + bookmark.time
     newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper"
 
-    newBookmarkBottomWrapperElement.appendChild(imgElement)
+    newBookmarkBottomWrapperElement.appendChild(timestampImgElement)
     newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement)
     newBookmarkBottomWrapperElement.appendChild(controlsElement)
 
-    newBookmarkElement.appendChild(imgElement)
+    newBookmarkElement.appendChild(timestampImgElement)
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement)
     
     bookmarkListElem.appendChild(newBookmarkElement)

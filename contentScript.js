@@ -79,6 +79,10 @@ chrome.runtime.onMessage.addListener(async (obj) => {
         case "play-new-timestamp-in-video":
             videoElem.currentTime = value
 
+            if (videoElem.paused) {
+                videoElem.play()
+            }
+
             // Once we go to that time in the video, show the timestamp progress bar for a second before hiding it again.
             const html5VideoPlayerElem = document.querySelector('.html5-video-player')
             html5VideoPlayerElem.classList.remove("ytp-autohide")
@@ -95,14 +99,9 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             })
             break
         case "get-current-video-bookmarks-with-data-url":
-            console.log('get-current-video-bookmarks-with-data-url....')
-            debugger
-
             if (!videoElem) {
                 videoElem = document.getElementsByClassName('video-stream')[0]
             }
-
-            console.log('Video Elem!')
 
             const newCurrentVideoBookmarks = []
 
@@ -117,10 +116,6 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             }
 
             currentVideoBookmarks = newCurrentVideoBookmarks
-
-            console.log('Finsihed fetching')
-            console.log(currentVideoBookmarks)
-            debugger
             
             return currentVideoBookmarks
     }
@@ -144,7 +139,6 @@ const captureFrameAtTimestamp = async (video, timestamp) => {
     return new Promise((resolve, reject) => {
         // Error handling if the video cannot be played
         if (video.readyState < 2) {
-            debugger
             reject("Video is not ready for playback");
             return;
         }
@@ -159,10 +153,8 @@ const captureFrameAtTimestamp = async (video, timestamp) => {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const dataUrl = canvas.toDataURL('image/png');
 
-                debugger
                 resolve(dataUrl);
             } catch (error) {
-                debugger
                 reject("Failed to capture frame: " + error.message);
             } finally {
                 video.removeEventListener('seeked', onSeeked);

@@ -36,10 +36,6 @@ const getCurrentVideoBookmarks = async (sendResponse) => {
     const tabId = activeTab.id
 
     chrome.tabs.sendMessage(tabId, { type: "get-current-video-bookmarks-with-data-url" }, {},(response) => {
-        console.log('bookmarks with data url response')
-        console.log(response)
-        debugger
-
         currentVideoBookmarks = response
 
         if (chrome.runtime.lastError) {
