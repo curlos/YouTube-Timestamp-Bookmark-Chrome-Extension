@@ -1,5 +1,3 @@
-import { getActiveTabURL, formatTime } from "./utils.js";
-
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
  */

@@ -58,15 +58,16 @@ const newVideoLoaded = async () => {
         }
 
         if (!bookmarkBtnExists) {
-            const bookmarkBtn = document.createElement("img");
+            const bookmarkSvgContainer = document.createElement('div')
 
-            bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
-            bookmarkBtn.className = "ytp-button bookmark-btn";
-            bookmarkBtn.title = "Click to bookmark current timestamp";
-            bookmarkBtn.addEventListener("click", handleAddNewBookmark);
+            bookmarkSvgContainer.className = "ytp-button bookmark-btn";
+            bookmarkSvgContainer.title = "Click to bookmark current timestamp";
+            bookmarkSvgContainer.addEventListener("click", handleAddNewBookmark);
+
+            bookmarkSvgContainer.innerHTML = 
 
             youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-            youtubeLeftControls.appendChild(bookmarkBtn);
+            youtubeLeftControls.appendChild(bookmarkSvgContainer);
         }
     }
 };
@@ -134,48 +135,3 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
 newVideoLoaded();
-
-const getTime = (t) => {
-    const date = new Date(0);
-    date.setSeconds(t);
-
-    return date.toISOString().substr(11, 8);
-};
-
-const captureFrameAtTimestamp = async (video, timestamp) => {
-    if (!video) {
-        throw new Error("Video element not provided");
-    }
-
-    return new Promise((resolve, reject) => {
-        // Error handling if the video cannot be played
-        if (video.readyState < 2) {
-            reject("Video is not ready for playback");
-            return;
-        }
-
-        // Function to perform the capture
-        const onSeeked = () => {
-            try {
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL("image/png");
-
-                resolve(dataUrl);
-            } catch (error) {
-                reject("Failed to capture frame: " + error.message);
-            } finally {
-                video.removeEventListener("seeked", onSeeked);
-            }
-        };
-
-        // Add the listener before setting currentTime to avoid any race condition
-        video.addEventListener("seeked", onSeeked, { once: true });
-
-        // Set currentTime after adding listener
-        video.currentTime = timestamp;
-    });
-};
