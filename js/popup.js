@@ -36,12 +36,15 @@ const renderElemBookmarks = async (currentVideoBookmarks = []) => {
         return;
     }
 
-    for (let bookmark of currentVideoBookmarks) {
-        await addNewBookmarkElem(bookmarkListElem, bookmark);
+    for (let i = 0; i < currentVideoBookmarks.length; i++) {
+        const bookmark = currentVideoBookmarks[i]
+        const isLastIndex = (i === currentVideoBookmarks.length - 1)
+
+        await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
     }
 };
 
-const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
+const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     const bookmarkTitleElement = document.createElement("div");
     const controlsElement = document.createElement("div");
     const newBookmarkElement = document.createElement("div");
@@ -62,14 +65,14 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
         onPlay(bookmark.time);
     });
 
-    setBookmarkAttributes(
+    setControlBookmarkSVGElem(
         "play",
         () => {
             onPlay(bookmark.time);
         },
         controlsElement,
     );
-    setBookmarkAttributes(
+    setControlBookmarkSVGElem(
         "delete",
         () => {
             onDelete(bookmark.time);
@@ -79,6 +82,10 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
 
     newBookmarkElement.id = "bookmark-" + bookmark.time;
     newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper";
+
+    if (isLastIndex) {
+        newBookmarkBottomWrapperElement.classList.add('bookmark-no-bottom-border')
+    }
 
     newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
     newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement);
@@ -90,11 +97,10 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark) => {
     bookmarkListElem.appendChild(newBookmarkElement);
 };
 
-const setBookmarkAttributes = (src, eventListener, controlParentElement) => {
-    const controlElement = document.createElement("img");
-
-    controlElement.src = "assets/" + src + ".png";
-    controlElement.title = src;
+const setControlBookmarkSVGElem = (name, eventListener, controlParentElement) => {
+    const controlElement = document.createElement("div");
+    controlElement.innerHTML = getIconSVG(name)
+    
     controlElement.addEventListener("click", eventListener);
     controlParentElement.appendChild(controlElement);
 };

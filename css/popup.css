@@ -43,19 +43,27 @@ body {
     border-bottom-color: white;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    padding: 3px;
-    padding-bottom: 7px;
-    margin-bottom: 7px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.bookmark-no-bottom-border {
+    border-bottom-width: 0px;
 }
 
 .bookmark-title {
-    padding-left: 2px;
+    font-size: 14px;
 }
 
-.bookmark-controls img {
-    margin: 0 4px;
-    width: 18px;
-    height: 18px;
+.bookmark-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
+
+.bookmark-controls svg {
     cursor: pointer;
 }
 .bookmark-controls {
