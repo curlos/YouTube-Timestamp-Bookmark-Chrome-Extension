@@ -123,6 +123,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
             const currentVideoBookmarksWithFramesByTime = currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
 
+            let capturedAtLeastOneFrame = false
 
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];
@@ -138,14 +139,18 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
                 const dataUrl = await captureFrameAtTimestamp(videoElem, bookmark.time);
 
+                capturedAtLeastOneFrame = true
+
                 newCurrentVideoBookmarksWithFrames.push({
                     ...bookmark,
                     dataUrl,
                 });
             }
 
-            // Because capturing a frame requires that we go to the actual time in the video, reset the time back to the timestamp that the user was on before starting to capture the bookmarked frames.
-            videoElem.currentTime = timestampBeforeCapturing
+            if (capturedAtLeastOneFrame) {
+                // Because capturing a frame requires that we go to the actual time in the video, reset the time back to the timestamp that the user was on before starting to capture the bookmarked frames.
+                videoElem.currentTime = timestampBeforeCapturing
+            }
 
             const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
             bookmarkButton.disabled = false
