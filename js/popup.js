@@ -8,7 +8,7 @@ let currentVideoFullObj = null
  */
 document.onreadystatechange = async () => {
     if (document.readyState === "complete") {
-        const activeTab = await getActiveTabURL();
+        const activeTab = await getActiveTab();
         const queryParams = activeTab.url.split("?")[1];
         const urlParams = new URLSearchParams(queryParams);
 
@@ -100,12 +100,8 @@ const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
     await getAllVideosWithBookmarks()
 
-    console.log(allVideosWithBookmarks)
-
     Object.keys(allVideosWithBookmarks).forEach((videoId) => {
         const video = JSON.parse(allVideosWithBookmarks[videoId])
-
-        console.log(video)
 
         const videoWithBookmarksElem = document.createElement('div')
         videoWithBookmarksElem.className = 'video-with-bookmarks'
@@ -127,6 +123,19 @@ const renderSidebarModalWithVideos = async () => {
 
         videoWithBookmarksElem.appendChild(thumbnailImageElement)
         videoWithBookmarksElem.appendChild(videoInfoElem)
+
+        // When the video container is clicked, navigate to that video's page.
+        videoWithBookmarksElem.addEventListener('click', async () => {
+            const videoURL = `https://www.youtube.com/watch?v=${videoId}`
+            const activeTab = await getActiveTab()
+
+            chrome.tabs.update(activeTab.id, {
+                url: videoURL
+            })
+
+            // Close the popup after navigating to the new video page.
+            window.close()
+        })
 
         sidebarVideoListElem.appendChild(videoWithBookmarksElem)
     })
@@ -223,7 +232,7 @@ const setControlBookmarkSVGElem = (name, eventListener, controlParentElement) =>
 };
 
 const handlePlayVideo = async (bookmarkTime) => {
-    const activeTab = await getActiveTabURL();
+    const activeTab = await getActiveTab();
 
     chrome.tabs.sendMessage(activeTab.id, {
         type: "play-new-timestamp-in-video",
