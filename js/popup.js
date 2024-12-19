@@ -43,7 +43,6 @@ const renderDeleteAllBookmarksButton = () => {
     deleteVideoBookmarksButton.textContent = 'Delete Video Bookmarks'
 
     deleteVideoBookmarksButton.addEventListener('click', async () => {
-        console.log('Deleting all bookmarks for video!')
         await handleDeleteAllBookmarks()
     })
 
@@ -68,10 +67,37 @@ const renderLeftMenuButton = () => {
 }
 
 const renderSidebarModalWithVideos = async () => {
-    document.querySelector('.sidebar-content')
+    const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
     const allVideosWithBookmarks = await getAllVideosWithBookmarks()
 
     console.log(allVideosWithBookmarks)
+
+    Object.keys(allVideosWithBookmarks).forEach((videoId) => {
+        const video = allVideosWithBookmarks[videoId]
+
+        const videoWithBookmarksElem = document.createElement('div')
+        videoWithBookmarksElem.className = 'video-with-bookmarks'
+
+        const thumbnailImageElement = document.createElement('img')
+        thumbnailImageElement.src = 'https://i.ytimg.com/vi/U5Q1Bu3bpTc/maxresdefault.jpg'
+
+        const videoInfoElem = document.createElement('div')
+        
+        const titleElement = document.createElement('div')
+        titleElement.textContent = `RG Hi-Nu Gundam - Char's Counterattack: Beltorchika's Children UNBOXING & Review!`
+        titleElement.className = 'video-with-bookmarks-title'
+        
+        const bookmarksNumberElement = document.createElement('div')
+        bookmarksNumberElement.textContent = '5 Bookmarks'
+
+        videoInfoElem.appendChild(titleElement)
+        videoInfoElem.appendChild(bookmarksNumberElement)
+
+        videoWithBookmarksElem.appendChild(thumbnailImageElement)
+        videoWithBookmarksElem.appendChild(videoInfoElem)
+
+        sidebarVideoListElem.appendChild(videoWithBookmarksElem)
+    })
 }
 
 const renderSpinner = () => {

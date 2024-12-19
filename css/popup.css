@@ -33,8 +33,7 @@ body {
 }
 
 .bookmarks {
-    margin: 5px 5px;
-    padding: 3px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -45,7 +44,7 @@ body {
 .bookmark-bottom-wrapper {
     display: flex;
     align-items: center;
-    border-bottom-color: white;
+    border-bottom-color: #919191;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     padding-top: 10px;
@@ -116,6 +115,7 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 10px;
+    border-bottom: 1px solid #919191;
 }
 
 #menu-svg-wrapper {
@@ -132,7 +132,7 @@ body {
     left: -100%; /* Start hidden to the left */
     width: 100%; /* Make width same as popup */
     height: 100%; /* Make height same as popup */
-    background-color: #f4f4f4;
+    background-color: rgb(50, 50, 50);
     box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
     transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
 }
@@ -141,8 +141,28 @@ body {
     left: 0; /* Slides the sidebar into view */
 }
 
-.sidebar-content {
-    padding: 20px;
+/* .sidebar-video-list {
+    padding: 8px;
+} */
+
+.video-with-bookmarks {
+    padding: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.video-with-bookmarks:hover {
+    background-color: rgb(79, 79, 79);
+    cursor: pointer;
+}
+
+.video-with-bookmarks img {
+    width: 100px;
+    height: 100%;
+}
+
+.video-with-bookmarks-title {
+    font-weight: bold;
 }
 
 /* Styles applied within the .gray-scrollbar class context */
