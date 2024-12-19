@@ -9,6 +9,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case "open-popup":
             chrome.action.openPopup();
             break;
+        case "get-active-tab":
+            getActiveTab(sendResponse)
         case "background-get-current-video-bookmarks-with-frames":
             getCurrentVideoBookmarksWithFrames(sendResponse);
             return true;
@@ -26,13 +28,14 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
             videoId,
+            activeTab: tab
         });
     }
 });
 
 // Chrome sadly has this weird system for sending responses back with async/await functions so the only way I got this to properly work was doing it this way by passing in "sendResponse". Got this idea from a StackOverflow answer here: https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
 const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
-    const activeTab = await getActiveTabURL();
+    const activeTab = await getActiveTab();
     const tabId = activeTab.id;
 
     chrome.tabs.sendMessage(tabId, { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames }, {}, (response) => {
@@ -47,11 +50,15 @@ const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
     });
 };
 
-async function getActiveTabURL() {
+async function getActiveTab(sendResponse) {
     const tabs = await chrome.tabs.query({
         currentWindow: true,
         active: true,
     });
+
+    if (sendResponse) {
+        sendResponse(tabs[0])
+    }
 
     return tabs[0];
 }

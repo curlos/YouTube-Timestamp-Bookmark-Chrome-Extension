@@ -1,6 +1,7 @@
 let currentVideoBookmarks = []
 let currentVideoId = null
 let allVideosWithBookmarks = null
+let currentVideoFullObj = null
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
@@ -71,6 +72,10 @@ const renderDeleteAllBookmarksButton = async () => {
 
     deleteAllBookmarksButtonWrapper.appendChild(deleteAllBookmarksButton)
 
+    deleteAllBookmarksButtonWrapper.addEventListener('click', async () => {
+        await chrome.storage.sync.clear()
+    })
+
     const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
     sidebarVideoListElem.appendChild(deleteAllBookmarksButtonWrapper)
 }
@@ -98,22 +103,24 @@ const renderSidebarModalWithVideos = async () => {
     console.log(allVideosWithBookmarks)
 
     Object.keys(allVideosWithBookmarks).forEach((videoId) => {
-        const video = allVideosWithBookmarks[videoId]
+        const video = JSON.parse(allVideosWithBookmarks[videoId])
+
+        console.log(video)
 
         const videoWithBookmarksElem = document.createElement('div')
         videoWithBookmarksElem.className = 'video-with-bookmarks'
 
         const thumbnailImageElement = document.createElement('img')
-        thumbnailImageElement.src = 'https://i.ytimg.com/vi/U5Q1Bu3bpTc/maxresdefault.jpg'
+        thumbnailImageElement.src = video.thumbnailImageSrc
 
         const videoInfoElem = document.createElement('div')
         
         const titleElement = document.createElement('div')
-        titleElement.textContent = `RG Hi-Nu Gundam - Char's Counterattack: Beltorchika's Children UNBOXING & Review!`
+        titleElement.textContent = video.title
         titleElement.className = 'video-with-bookmarks-title'
         
         const bookmarksNumberElement = document.createElement('div')
-        bookmarksNumberElement.textContent = '5 Bookmarks'
+        bookmarksNumberElement.textContent = video.bookmarks.length > 1 ? `${video.bookmarks.length} Bookmarks` : `${video.bookmarks.length} Bookmark`
 
         videoInfoElem.appendChild(titleElement)
         videoInfoElem.appendChild(bookmarksNumberElement)
@@ -231,8 +238,13 @@ const handleDeleteBookmark = async (bookmarkTime) => {
     await fetchBookmarks()
 
     const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== bookmarkTime)
+
     await chrome.storage.sync.set({
-        [currentVideoId]: JSON.stringify(filteredCurrentVideoBookmarks),
+        [currentVideoId]: JSON.stringify({
+            bookmarks: filteredCurrentVideoBookmarks,
+            title: currentVideoFullObj.title,
+            thumbnailImageSrc: currentVideoFullObj.thumbnailImageSrc
+        }),
     });
     await handleFilteredBookmarks()
      
@@ -275,5 +287,6 @@ const getAllVideosWithBookmarks = () => {
  */
 const fetchBookmarks = async () => {
     const obj = await chrome.storage.sync.get(currentVideoId);
-    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : [];
+    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
+    currentVideoFullObj = obj[currentVideoId]
 };

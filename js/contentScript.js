@@ -14,6 +14,8 @@ let youtubeLeftControls = null;
 let videoElem = null;
 let currentVideoId = "";
 let currentVideoBookmarks = []
+let currentVideoFullObj = null
+let activeTab = null
 
 /**
  * @description Fetch the array of bookmarks for the current video. If no bookmarks, will return an empty array.
@@ -21,7 +23,10 @@ let currentVideoBookmarks = []
  */
 const fetchBookmarks = async () => {
     const obj = await chrome.storage.sync.get(currentVideoId);
-    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : [];
+    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
+    currentVideoFullObj = obj[currentVideoId]
+
+    console.log(currentVideoFullObj)
 };
 
 /**
@@ -39,7 +44,18 @@ const handleAddNewBookmark = async () => {
     await fetchBookmarks();
     const newCurrentVideoBookmarks = [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)
 
-    const newCurrentVideoBookmarksStr = JSON.stringify(newCurrentVideoBookmarks);
+    console.log(activeTab)
+
+    const title = currentVideoFullObj && currentVideoFullObj.title || activeTab.title
+    const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || (
+        document.querySelector('link[itemprop="thumbnailUrl"]') && document.querySelector('link[itemprop="thumbnailUrl"]').href
+    )
+
+    const newCurrentVideoBookmarksStr = JSON.stringify({
+        bookmarks: newCurrentVideoBookmarks,
+        title,
+        thumbnailImageSrc
+    });
 
     await chrome.storage.sync.set({
         [currentVideoId]: newCurrentVideoBookmarksStr,
@@ -79,7 +95,11 @@ const newVideoLoaded = async () => {
 };
 
 chrome.runtime.onMessage.addListener(async (obj) => {
-    const { type, value, videoId } = obj;
+    const { type, value, videoId, activeTab: backgroundActiveTab } = obj;
+
+    if (backgroundActiveTab) {
+        activeTab = backgroundActiveTab
+    }
 
     switch (type) {
         case "tab-updated-new-video":
