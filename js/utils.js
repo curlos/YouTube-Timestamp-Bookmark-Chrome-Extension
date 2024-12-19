@@ -93,3 +93,13 @@ const getIconSVG = (name, color = 'white', width = '16px', height = '16px') => {
         </svg>`
     )
 }
+
+const arrayToObjectByKey = (array, keyProperty) => {
+	return array.reduce((acc, obj) => {
+		// Use the value of the specified property as the key
+		const key = keyProperty ? obj[keyProperty] : obj;
+		// Assign the entire object as the value for this key
+		acc[key] = obj;
+		return acc;
+	}, {});
+}

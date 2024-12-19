@@ -14,7 +14,7 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderSidebarModalWithVideos()
 
-            chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, async (currentVideoBookmarks) => {
+            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarks) => {
                 await renderElemBookmarks(currentVideoBookmarks);
 
                 renderDeleteAllBookmarksButton(currentVideoId, currentVideoBookmarks)

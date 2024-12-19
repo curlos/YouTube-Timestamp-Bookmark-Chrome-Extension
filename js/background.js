@@ -1,5 +1,5 @@
 let readyTabs = new Set();
-let currentVideoBookmarks = null;
+let currentVideoBookmarksWithFrames = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.type) {
@@ -9,10 +9,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case "open-popup":
             chrome.action.openPopup();
             break;
-        case "get-current-video-bookmarks":
-            return currentVideoBookmarks;
-        case "async-get-current-video-bookmarks":
-            getCurrentVideoBookmarks(sendResponse);
+        case "background-get-current-video-bookmarks-with-frames":
+            getCurrentVideoBookmarksWithFrames(sendResponse);
             return true;
     }
 });
@@ -23,7 +21,7 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
         const urlParameters = new URLSearchParams(queryParameters);
         const videoId = urlParameters.get("v");
 
-        currentVideoBookmarks = null
+        currentVideoBookmarksWithFrames = null
 
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
@@ -33,12 +31,12 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
 });
 
 // Chrome sadly has this weird system for sending responses back with async/await functions so the only way I got this to properly work was doing it this way by passing in "sendResponse". Got this idea from a StackOverflow answer here: https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
-const getCurrentVideoBookmarks = async (sendResponse) => {
+const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
     const activeTab = await getActiveTabURL();
     const tabId = activeTab.id;
 
-    chrome.tabs.sendMessage(tabId, { type: "get-current-video-bookmarks-with-data-url", currentVideoBookmarks }, {}, (response) => {
-        currentVideoBookmarks = response;
+    chrome.tabs.sendMessage(tabId, { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames }, {}, (response) => {
+        currentVideoBookmarksWithFrames = response;
 
         if (chrome.runtime.lastError) {
             // Handle any errors that might occur

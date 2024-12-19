@@ -42,6 +42,9 @@ const handleAddNewBookmark = async () => {
         [currentVideoId]: newCurrentVideoBookmarksStr,
     });
 
+    // Get the updated bookmarks with the newly added one.
+    currentVideoBookmarks = await fetchBookmarks()
+
     await chrome.runtime.sendMessage({ type: "open-popup" });
 };
 
@@ -102,34 +105,44 @@ chrome.runtime.onMessage.addListener(async (obj) => {
                 [currentVideoId]: JSON.stringify(currentVideoBookmarks),
             });
             break;
-        case "get-current-video-bookmarks-with-data-url":
-            const { currentVideoBookmarks: backgroundCurrentVideoBookmarks } = obj
-
-            if (backgroundCurrentVideoBookmarks) {
-                return backgroundCurrentVideoBookmarks
-            }
+        case "content-get-current-video-bookmarks-with-frames":
+            const { currentVideoBookmarksWithFrames } = obj
 
             if (!videoElem) {
                 videoElem = document.getElementsByClassName("video-stream")[0];
             }
 
-            const newCurrentVideoBookmarks = [];
+            const timestampBeforeCapturing = videoElem.currentTime
 
-            console.log(currentVideoBookmarks)
+            const newCurrentVideoBookmarksWithFrames = [];
+
+            const currentVideoBookmarksWithFramesByTime = currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
+
 
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];
+
+                const alreadyHasFrame = currentVideoBookmarksWithFramesByTime && currentVideoBookmarksWithFramesByTime[bookmark.time] && currentVideoBookmarksWithFramesByTime[bookmark.time].dataUrl
+
+                // If we already have the captured frame for the bookmark at that time, then use the cached frame.
+                if (alreadyHasFrame) {
+                    const bookmarkWithFrame = currentVideoBookmarksWithFramesByTime[bookmark.time]
+                    newCurrentVideoBookmarksWithFrames.push(bookmarkWithFrame)
+                    continue
+                }
+
                 const dataUrl = await captureFrameAtTimestamp(videoElem, bookmark.time);
 
-                newCurrentVideoBookmarks.push({
+                newCurrentVideoBookmarksWithFrames.push({
                     ...bookmark,
                     dataUrl,
                 });
             }
 
-            currentVideoBookmarks = newCurrentVideoBookmarks;
+            // Because capturing a frame requires that we go to the actual time in the video, reset the time back to the timestamp that the user was on before starting to capture the bookmarked frames.
+            videoElem.currentTime = timestampBeforeCapturing
 
-            return currentVideoBookmarks;
+            return newCurrentVideoBookmarksWithFrames;
     }
 });
 
