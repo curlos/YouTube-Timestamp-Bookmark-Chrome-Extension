@@ -141,9 +141,10 @@ body {
     left: 0; /* Slides the sidebar into view */
 }
 
-/* .sidebar-video-list {
-    padding: 8px;
-} */
+.sidebar-video-list {
+    height: 550px;
+    overflow: auto;
+}
 
 .video-with-bookmarks {
     padding: 8px;
@@ -195,11 +196,14 @@ body {
 .delete-video-bookmarks-button {
     background-color: rgba(217, 77, 77, 0.25);
     color: red;
-    padding: 5px;
+    padding: 8px;
     font-size: 14px;
     cursor: pointer;
 }
 
 .delete-video-bookmarks-button:hover {
     background-color: rgba(217, 77, 77, 0.40);
+}
+.delete-all-bookmarks-button {
+    margin-top: 10px;
 }

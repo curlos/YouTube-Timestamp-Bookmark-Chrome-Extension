@@ -1,5 +1,6 @@
 let currentVideoBookmarks = []
 let currentVideoId = null
+let allVideosWithBookmarks = null
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
@@ -21,7 +22,7 @@ document.onreadystatechange = async () => {
                 currentVideoBookmarks = newCurrentVideoBookmarks
 
                 await renderElemBookmarks();
-                renderDeleteAllBookmarksButton()
+                renderDeleteVideoBookmarksButton()
             });
         } else {
             const container = document.getElementsByClassName("container")[0];
@@ -30,7 +31,7 @@ document.onreadystatechange = async () => {
     }
 };
 
-const renderDeleteAllBookmarksButton = () => {
+const renderDeleteVideoBookmarksButton = () => {
     if (currentVideoBookmarks.length === 0) {
         return
     }
@@ -48,6 +49,30 @@ const renderDeleteAllBookmarksButton = () => {
 
     deleteVideoBookmarksButtonWrapper.appendChild(deleteVideoBookmarksButton)
     document.querySelector('.bookmarks').appendChild(deleteVideoBookmarksButtonWrapper)
+}
+
+const renderDeleteAllBookmarksButton = async () => {
+    await getAllVideosWithBookmarks()
+
+    if (!allVideosWithBookmarks || Object.keys(allVideosWithBookmarks).length === 0) {
+        return
+    }
+
+    const deleteAllBookmarksButtonWrapper = document.createElement('div')
+    deleteAllBookmarksButtonWrapper.className = 'delete-video-bookmarks-button-wrapper'
+
+    const deleteAllBookmarksButton = document.createElement('div')
+    deleteAllBookmarksButton.className = 'delete-video-bookmarks-button delete-all-bookmarks-button'
+    deleteAllBookmarksButton.textContent = 'Delete All Bookmarks'
+
+    deleteAllBookmarksButton.addEventListener('click', async () => {
+        await handleDeleteAllBookmarks()
+    })
+
+    deleteAllBookmarksButtonWrapper.appendChild(deleteAllBookmarksButton)
+
+    const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
+    sidebarVideoListElem.appendChild(deleteAllBookmarksButtonWrapper)
 }
 
 const renderLeftMenuButton = () => {
@@ -68,7 +93,7 @@ const renderLeftMenuButton = () => {
 
 const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
-    const allVideosWithBookmarks = await getAllVideosWithBookmarks()
+    await getAllVideosWithBookmarks()
 
     console.log(allVideosWithBookmarks)
 
@@ -98,6 +123,8 @@ const renderSidebarModalWithVideos = async () => {
 
         sidebarVideoListElem.appendChild(videoWithBookmarksElem)
     })
+
+    await renderDeleteAllBookmarksButton()
 }
 
 const renderSpinner = () => {
@@ -234,6 +261,8 @@ const getAllVideosWithBookmarks = () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
             } else {
+                allVideosWithBookmarks = items
+
                 resolve(items);
             }
         });
