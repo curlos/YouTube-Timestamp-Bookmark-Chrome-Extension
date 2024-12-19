@@ -14,8 +14,9 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderSidebarModalWithVideos()
 
-            chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, (currentVideoBookmarks) => {
-                renderElemBookmarks(currentVideoBookmarks);
+            chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, async (currentVideoBookmarks) => {
+                await renderElemBookmarks(currentVideoBookmarks);
+                renderDeleteAllBookmarksButton()
             });
         } else {
             const container = document.getElementsByClassName("container")[0];
@@ -23,6 +24,24 @@ document.onreadystatechange = async () => {
         }
     }
 };
+
+const renderDeleteAllBookmarksButton = () => {
+    console.log('All bookmarks fetched - now showing delete all!')
+
+    const deleteAllButtonWrapper = document.createElement('div')
+    deleteAllButtonWrapper.className = 'delete-all-button-wrapper'
+
+    const deleteAllButton = document.createElement('div')
+    deleteAllButton.className = 'delete-all-button'
+    deleteAllButton.textContent = 'Delete Video Bookmarks'
+
+    deleteAllButton.addEventListener('click', () => {
+        console.log('Deleting all bookmarks for video!')
+    })
+
+    deleteAllButtonWrapper.appendChild(deleteAllButton)
+    document.querySelector('.bookmarks').appendChild(deleteAllButtonWrapper)
+}
 
 const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");

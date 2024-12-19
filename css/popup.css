@@ -164,3 +164,22 @@ body {
 .bookmarks-outer-wrapper {
     position: relative;
 }
+
+.delete-all-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.delete-all-button {
+    background-color: rgba(217, 77, 77, 0.25);
+    color: red;
+    padding: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.delete-all-button:hover {
+    background-color: rgba(217, 77, 77, 0.40);
+}
