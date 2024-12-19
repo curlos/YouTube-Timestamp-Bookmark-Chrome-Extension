@@ -1,3 +1,6 @@
+let currentVideoBookmarks = []
+let currentVideoId = null
+
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
  */
@@ -14,10 +17,11 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderSidebarModalWithVideos()
 
-            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarks) => {
-                await renderElemBookmarks(currentVideoBookmarks);
+            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (newCurrentVideoBookmarks) => {
+                currentVideoBookmarks = newCurrentVideoBookmarks
 
-                renderDeleteAllBookmarksButton(currentVideoId, currentVideoBookmarks)
+                await renderElemBookmarks();
+                renderDeleteAllBookmarksButton()
             });
         } else {
             const container = document.getElementsByClassName("container")[0];
@@ -26,7 +30,7 @@ document.onreadystatechange = async () => {
     }
 };
 
-const renderDeleteAllBookmarksButton = (currentVideoId, currentVideoBookmarks) => {
+const renderDeleteAllBookmarksButton = () => {
     if (currentVideoBookmarks.length === 0) {
         return
     }
@@ -78,7 +82,7 @@ const renderSpinner = () => {
     bookmarkListElem.appendChild(loadingSpinnerElem)
 }
 
-const renderElemBookmarks = async (currentVideoBookmarks = []) => {
+const renderElemBookmarks = async () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
