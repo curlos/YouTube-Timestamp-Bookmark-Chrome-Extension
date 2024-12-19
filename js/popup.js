@@ -42,8 +42,9 @@ const renderDeleteAllBookmarksButton = () => {
     deleteVideoBookmarksButton.className = 'delete-video-bookmarks-button'
     deleteVideoBookmarksButton.textContent = 'Delete Video Bookmarks'
 
-    deleteVideoBookmarksButton.addEventListener('click', () => {
+    deleteVideoBookmarksButton.addEventListener('click', async () => {
         console.log('Deleting all bookmarks for video!')
+        await handleDeleteAllBookmarks()
     })
 
     deleteVideoBookmarksButtonWrapper.appendChild(deleteVideoBookmarksButton)
@@ -109,7 +110,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     bookmarkTitleElement.textContent = formatTime(bookmark.time);
     bookmarkTitleElement.className = "bookmark-title";
     bookmarkTitleElement.addEventListener('click', () => {
-        onPlay(bookmark.time)
+        handlePlayVideo(bookmark.time)
     })
 
     controlsElement.className = "bookmark-controls";
@@ -117,20 +118,20 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     timestampImgElement.src = bookmark.dataUrl;
     timestampImgElement.className = "timestamp-img";
     timestampImgElement.addEventListener("click", () => {
-        onPlay(bookmark.time);
+        handlePlayVideo(bookmark.time);
     });
 
     setControlBookmarkSVGElem(
         "play",
         () => {
-            onPlay(bookmark.time);
+            handlePlayVideo(bookmark.time);
         },
         controlsElement,
     );
     setControlBookmarkSVGElem(
         "delete",
         () => {
-            onDelete(bookmark.time);
+            handleDeleteBookmark(bookmark.time);
         },
         controlsElement,
     );
@@ -161,7 +162,7 @@ const setControlBookmarkSVGElem = (name, eventListener, controlParentElement) =>
     controlParentElement.appendChild(controlElement);
 };
 
-const onPlay = async (bookmarkTime) => {
+const handlePlayVideo = async (bookmarkTime) => {
     const activeTab = await getActiveTabURL();
 
     chrome.tabs.sendMessage(activeTab.id, {
@@ -170,19 +171,26 @@ const onPlay = async (bookmarkTime) => {
     });
 };
 
-const onDelete = async (bookmarkTime) => {
+const handleDeleteBookmark = async (bookmarkTime) => {
     const bookmarkElementToDelete = document.getElementById("bookmark-" + bookmarkTime);
-
     bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
     
     await fetchBookmarks()
 
     const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== bookmarkTime)
-
     await chrome.storage.sync.set({
         [currentVideoId]: JSON.stringify(filteredCurrentVideoBookmarks),
     });
+    await handleFilteredBookmarks()
+     
+};
 
+const handleDeleteAllBookmarks = async () => {
+    await chrome.storage.sync.remove(currentVideoId)
+    await handleFilteredBookmarks()
+}
+
+const handleFilteredBookmarks = async () => {
     await fetchBookmarks()
 
     if (currentVideoBookmarks.length === 0) {
@@ -192,8 +200,7 @@ const onDelete = async (bookmarkTime) => {
         const bookmarkListElem = document.getElementById("bookmarks");
         bookmarkListElem.innerHTML = '<i class="row">No bookmarks to show</i>';
     }
-    
-};
+}
 
 const getAllVideosWithBookmarks = () => {
     return new Promise((resolve, reject) => {
