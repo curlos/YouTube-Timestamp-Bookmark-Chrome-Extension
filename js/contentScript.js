@@ -47,9 +47,7 @@ const handleAddNewBookmark = async () => {
     console.log(activeTab)
 
     const title = currentVideoFullObj && currentVideoFullObj.title || activeTab.title
-    const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || (
-        document.querySelector('link[itemprop="thumbnailUrl"]') && document.querySelector('link[itemprop="thumbnailUrl"]').href
-    )
+    const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || getThumbnailUrl()
 
     const newCurrentVideoBookmarksStr = JSON.stringify({
         bookmarks: newCurrentVideoBookmarks,
@@ -66,6 +64,23 @@ const handleAddNewBookmark = async () => {
 
     await chrome.runtime.sendMessage({ type: "open-popup" });
 };
+
+const getThumbnailUrl = () => {
+    const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+
+    for (let scriptJsonElem of scriptJsonElemList) {
+        if (scriptJsonElem.textContent) {
+            const scriptJsonObj = JSON.parse(scriptJsonElem.textContent)
+            const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {}
+            
+            if (thumbnailUrlArray) {
+                return thumbnailUrlArray[0]
+            }
+        }
+    }
+
+    return ''
+}
 
 /**
  * @description When a new video is loaded, get that video's bookmarks and add the bookmark button to the video player's left controls if it hasn't been added yet.
@@ -103,6 +118,8 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
     switch (type) {
         case "tab-updated-new-video":
+            // Reset the global videos each time we land on a new video to prevent potential overlap of global variables.
+            resetGlobalVariables()
             currentVideoId = videoId;
             newVideoLoaded();
             break;
@@ -171,6 +188,14 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             return newCurrentVideoBookmarksWithFrames;
     }
 });
+
+const resetGlobalVariables = () => {
+    youtubeLeftControls = null;
+    videoElem = null;
+    currentVideoId = "";
+    currentVideoBookmarks = []
+    currentVideoFullObj = null
+}
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
 newVideoLoaded();
