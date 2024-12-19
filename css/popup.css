@@ -165,14 +165,14 @@ body {
     position: relative;
 }
 
-.delete-all-button-wrapper {
+.delete-video-bookmarks-button-wrapper {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
 }
 
-.delete-all-button {
+.delete-video-bookmarks-button {
     background-color: rgba(217, 77, 77, 0.25);
     color: red;
     padding: 5px;
@@ -180,6 +180,6 @@ body {
     cursor: pointer;
 }
 
-.delete-all-button:hover {
+.delete-video-bookmarks-button:hover {
     background-color: rgba(217, 77, 77, 0.40);
 }
