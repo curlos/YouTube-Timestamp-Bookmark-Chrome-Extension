@@ -10,7 +10,7 @@ document.onreadystatechange = async () => {
         const queryParams = activeTab.url.split("?")[1];
         const urlParams = new URLSearchParams(queryParams);
 
-        const currentVideoId = urlParams.get("v");
+        currentVideoId = urlParams.get("v");
 
         if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
             renderSpinner()
@@ -171,15 +171,28 @@ const onPlay = async (bookmarkTime) => {
 };
 
 const onDelete = async (bookmarkTime) => {
-    const activeTab = await getActiveTabURL();
     const bookmarkElementToDelete = document.getElementById("bookmark-" + bookmarkTime);
 
     bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
+    
+    await fetchBookmarks()
 
-    chrome.tabs.sendMessage(activeTab.id, {
-        type: "delete-bookmark",
-        value: bookmarkTime,
+    const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== bookmarkTime)
+
+    await chrome.storage.sync.set({
+        [currentVideoId]: JSON.stringify(filteredCurrentVideoBookmarks),
     });
+
+    await fetchBookmarks()
+
+    if (currentVideoBookmarks.length === 0) {
+        const deleteVideoBookmarksButtonWrapper = document.querySelector('.delete-video-bookmarks-button-wrapper')
+        deleteVideoBookmarksButtonWrapper.parentNode.removeChild(deleteVideoBookmarksButtonWrapper);
+
+        const bookmarkListElem = document.getElementById("bookmarks");
+        bookmarkListElem.innerHTML = '<i class="row">No bookmarks to show</i>';
+    }
+    
 };
 
 const getAllVideosWithBookmarks = () => {
@@ -193,3 +206,12 @@ const getAllVideosWithBookmarks = () => {
         });
     });
 }
+
+/**
+ * @description Fetch the array of bookmarks for the current video. If no bookmarks, will return an empty array.
+ * @returns {Array<Object>}
+ */
+const fetchBookmarks = async () => {
+    const obj = await chrome.storage.sync.get(currentVideoId);
+    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : [];
+};

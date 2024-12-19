@@ -102,13 +102,6 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             }, 1000);
 
             break;
-        case "delete-bookmark":
-            await fetchBookmarks()
-            const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== value)
-            chrome.storage.sync.set({
-                [currentVideoId]: JSON.stringify(filteredCurrentVideoBookmarks),
-            });
-            break;
         case "content-get-current-video-bookmarks-with-frames":
             const { currentVideoBookmarksWithFrames } = obj
             await fetchBookmarks()
