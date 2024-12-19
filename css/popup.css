@@ -127,7 +127,7 @@ body {
 }
 
 .sidebar-modal {
-    position: fixed; /* Ensures positioning within the popup */
+    position: absolute; /* Ensures positioning within the popup */
     top: 0;
     left: -100%; /* Start hidden to the left */
     width: 100%; /* Make width same as popup */
@@ -135,10 +135,6 @@ body {
     background-color: #f4f4f4;
     box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
     transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
-}
-
-.sidebar-hidden {
-    left: -100%; /* Keeps the sidebar hidden to the left */
 }
 
 .sidebar-shown {
@@ -163,4 +159,8 @@ body {
 .gray-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #919191 transparent;
+}
+
+.bookmarks-outer-wrapper {
+    position: relative;
 }

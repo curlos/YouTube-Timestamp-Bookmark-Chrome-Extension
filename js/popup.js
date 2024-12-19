@@ -10,8 +10,9 @@ document.onreadystatechange = async () => {
         const currentVideoId = urlParams.get("v");
 
         if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
-            renderLeftMenuButton()
             renderSpinner()
+            renderLeftMenuButton()
+            renderSidebarModalWithVideos()
 
             chrome.runtime.sendMessage({ type: "async-get-current-video-bookmarks" }, (currentVideoBookmarks) => {
                 renderElemBookmarks(currentVideoBookmarks);
@@ -27,9 +28,23 @@ const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu")
     menuDiv.addEventListener('click', () => {
-        // TODO: Show the sidebar modal with the list of videos.
-        document.querySelector('.sidebar-modal').classList.replace('sidebar-hidden', 'sidebar-shown');
+        document.querySelector('.sidebar-modal').classList.toggle('sidebar-shown');
+
+        const isSidebarModalOpen = document.querySelector('.sidebar-modal').classList.contains('sidebar-shown')
+
+        if (isSidebarModalOpen) {
+            document.querySelector('.title').textContent = 'Videos With Bookmarks'
+        } else {
+            document.querySelector('.title').textContent = 'Bookmarks For This Video'
+        }
     })
+}
+
+const renderSidebarModalWithVideos = async () => {
+    document.querySelector('.sidebar-content')
+    const allVideosWithBookmarks = await getAllVideosWithBookmarks()
+
+    console.log(allVideosWithBookmarks)
 }
 
 const renderSpinner = () => {
@@ -140,3 +155,15 @@ const onDelete = async (bookmarkTime) => {
         value: bookmarkTime,
     });
 };
+
+const getAllVideosWithBookmarks = () => {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get(null, function(items) {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve(items);
+            }
+        });
+    });
+}
