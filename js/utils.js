@@ -103,3 +103,14 @@ const arrayToObjectByKey = (array, keyProperty) => {
 		return acc;
 	}, {});
 }
+
+/**
+ * @description Get the YouTube Shorts Video ID from the URL.
+ * @param {String} url - YouTube URL String
+ * @returns 
+ */
+const getYouTubeShortsVideoId = (url) => {
+    const match = url.match(/\/shorts\/([^/?]+)/);
+    const shortsId = match ? match[1] : null; // Exclude query params
+    return shortsId
+}

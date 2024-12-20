@@ -18,16 +18,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
-    if (tab.url && tab.url.includes("youtube.com/watch") && readyTabs.has(tabId)) {
+    const isYouTubeFullVideo = tab.url && tab.url.includes("youtube.com/watch")
+    const isYouTubeShortsVideo = tab.url && tab.url.includes("youtube.com/shorts")
+    const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo
+
+    if (isYouTubeVideo && readyTabs.has(tabId)) {
         const queryParameters = tab.url.split("?")[1];
         const urlParameters = new URLSearchParams(queryParameters);
-        const videoId = urlParameters.get("v");
+        const videoId = isYouTubeFullVideo ? urlParameters.get("v") : getYouTubeShortsVideoId(tab.url);
 
         currentVideoBookmarksWithFrames = null
 
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
             videoId,
+            videoType: isYouTubeFullVideo ? 'watch' : 'shorts',
             activeTab: tab
         });
     }
@@ -62,3 +67,10 @@ async function getActiveTab(sendResponse) {
 
     return tabs[0];
 }
+
+const getYouTubeShortsVideoId = (url) => {
+    const match = url.match(/\/shorts\/([^/?]+)/);
+    const shortsId = match ? match[1] : null; // Exclude query params
+    return shortsId
+}
+

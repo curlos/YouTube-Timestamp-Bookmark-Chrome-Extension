@@ -13,9 +13,15 @@ document.onreadystatechange = async () => {
         const queryParams = activeTab.url.split("?")[1];
         const urlParams = new URLSearchParams(queryParams);
 
-        currentVideoId = urlParams.get("v");
+        const isYouTubeFullVideo = activeTab.url && activeTab.url.includes("youtube.com/watch")
+        const isYouTubeShortsVideo = activeTab.url && activeTab.url.includes("youtube.com/shorts")
+        const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo
 
-        if (activeTab.url.includes("youtube.com/watch") && currentVideoId) {
+        if (isYouTubeVideo) {
+            currentVideoId = isYouTubeFullVideo ? urlParams.get("v") : getYouTubeShortsVideoId(activeTab.url);
+        }
+
+        if (currentVideoId) {
             renderSpinner()
             renderLeftMenuButton()
             renderSidebarModalWithVideos()
@@ -133,6 +139,7 @@ const renderSidebarModalWithVideos = async () => {
 
         // When the video container is clicked, navigate to that video's page.
         videoWithBookmarksElem.addEventListener('click', async () => {
+            // TODO: If I'm planning to add "Shorts", then I'll need to a add a type property to the video to state whether it's a "shorts" or "watch"
             const videoURL = `https://www.youtube.com/watch?v=${videoId}`
             const activeTab = await getActiveTab()
 

@@ -13,6 +13,8 @@ chrome.runtime.sendMessage({ type: "ready" });
 let youtubeLeftControls = null;
 let videoElem = null;
 let currentVideoId = "";
+// "currentVideoType" can either be "watch" or "shorts".
+let currentVideoType = ""
 let currentVideoBookmarks = []
 let currentVideoFullObj = null
 let activeTab = null
@@ -25,8 +27,6 @@ const fetchBookmarks = async () => {
     const obj = await chrome.storage.sync.get(currentVideoId);
     currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
     currentVideoFullObj = obj[currentVideoId]
-
-    console.log(currentVideoFullObj)
 };
 
 /**
@@ -66,17 +66,23 @@ const handleAddNewBookmark = async () => {
 };
 
 const getThumbnailUrl = () => {
-    const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+    if (currentVideoType === 'watch') {
+        const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
 
-    for (let scriptJsonElem of scriptJsonElemList) {
-        if (scriptJsonElem.textContent) {
-            const scriptJsonObj = JSON.parse(scriptJsonElem.textContent)
-            const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {}
-            
-            if (thumbnailUrlArray) {
-                return thumbnailUrlArray[0]
+        for (let scriptJsonElem of scriptJsonElemList) {
+            if (scriptJsonElem.textContent) {
+                const scriptJsonObj = JSON.parse(scriptJsonElem.textContent)
+                const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {}
+                
+                if (thumbnailUrlArray) {
+                    return thumbnailUrlArray[0]
+                }
             }
         }
+    }
+
+    if (currentVideoType === 'shorts') {
+        return `https://i.ytimg.com/vi/${currentVideoId}/frame0.jpg`
     }
 
     return ''
@@ -94,23 +100,43 @@ const newVideoLoaded = async () => {
             videoElem = document.getElementsByClassName("video-stream")[0];
         }
 
-        if (!bookmarkBtnExists) {
-            const bookmarkSvgContainer = document.createElement('button')
+        if (!bookmarkBtnExists || currentVideoType === 'shorts') {
+            switch (currentVideoType) {
+                case 'watch':
+                    const bookmarkBtnElement = createAndGetBookmarkBtnElement()
+                    youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
+                    youtubeLeftControls.appendChild(bookmarkBtnElement);
+                    break;
+                case 'shorts':
+                    const actionsElemList = Array.from(document.querySelectorAll('#actions'))
 
-            bookmarkSvgContainer.className = "ytp-button bookmark-btn";
-            bookmarkSvgContainer.title = "Click to bookmark current timestamp";
-            bookmarkSvgContainer.addEventListener("click", handleAddNewBookmark);
-
-            bookmarkSvgContainer.innerHTML = getIconSVG('bookmark')
-
-            youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-            youtubeLeftControls.appendChild(bookmarkSvgContainer);
+                    actionsElemList.forEach((actionsElem) => {
+                        const hasBookmarkBtn = actionsElem.querySelector('.bookmark-btn')
+            
+                        if (!hasBookmarkBtn) {
+                            // A new bookmark element has to be created for each "actions" container.
+                            const bookmarkBtnElement = createAndGetBookmarkBtnElement()
+                            actionsElem.insertBefore(bookmarkBtnElement, actionsElem.firstChild);
+                        }
+                    })
+            }
         }
     }
 };
 
+const createAndGetBookmarkBtnElement = () => {
+    const bookmarkSvgContainer = document.createElement('button')
+
+    bookmarkSvgContainer.className = "ytp-button bookmark-btn";
+    bookmarkSvgContainer.title = "Click to bookmark current timestamp";
+    bookmarkSvgContainer.addEventListener("click", handleAddNewBookmark);
+    bookmarkSvgContainer.innerHTML = getIconSVG('bookmark')
+
+    return bookmarkSvgContainer
+}
+
 chrome.runtime.onMessage.addListener(async (obj) => {
-    const { type, value, videoId, activeTab: backgroundActiveTab } = obj;
+    const { type, value, videoId, videoType, activeTab: backgroundActiveTab } = obj;
 
     if (backgroundActiveTab) {
         activeTab = backgroundActiveTab
@@ -121,6 +147,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             // Reset the global videos each time we land on a new video to prevent potential overlap of global variables.
             resetGlobalVariables()
             currentVideoId = videoId;
+            currentVideoType = videoType;
             newVideoLoaded();
             break;
         case "play-new-timestamp-in-video":
@@ -193,6 +220,7 @@ const resetGlobalVariables = () => {
     youtubeLeftControls = null;
     videoElem = null;
     currentVideoId = "";
+    currentVideoType = "";
     currentVideoBookmarks = []
     currentVideoFullObj = null
 }
