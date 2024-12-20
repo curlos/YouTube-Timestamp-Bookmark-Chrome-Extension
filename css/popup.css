@@ -133,6 +133,9 @@ body {
     width: 100%; /* Make width same as popup */
     height: 100%; /* Make height same as popup */
     background-color: rgb(50, 50, 50);
+}
+
+.sidebar-transition {
     box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
     transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
 }
@@ -205,5 +208,6 @@ body {
     background-color: rgba(217, 77, 77, 0.40);
 }
 .delete-all-bookmarks-button {
-    margin-top: 10px;
+    margin-top: 12px;
+    margin-right: 8px;
 }

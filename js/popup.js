@@ -29,8 +29,9 @@ document.onreadystatechange = async () => {
                 renderDeleteVideoBookmarksButton()
             });
         } else {
-            const container = document.getElementsByClassName("container")[0];
-            container.innerHTML = '<div class="title">This is not a YouTube video page.</div>';
+            renderSidebarModalWithVideos()
+            document.querySelector('.sidebar-modal').classList.add('sidebar-shown');
+            document.querySelector('.title').textContent = 'Videos With Bookmarks'
         }
     }
 };
@@ -87,6 +88,7 @@ const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu")
     menuDiv.addEventListener('click', () => {
+        document.querySelector('.sidebar-modal').classList.add('sidebar-transition')
         document.querySelector('.sidebar-modal').classList.toggle('sidebar-shown');
 
         const isSidebarModalOpen = document.querySelector('.sidebar-modal').classList.contains('sidebar-shown')
