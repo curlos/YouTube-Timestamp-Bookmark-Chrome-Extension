@@ -113,7 +113,18 @@ const renderSidebarModalWithVideos = async () => {
 
     await getAllVideosWithBookmarks()
 
-    Object.keys(allVideosWithBookmarks).forEach((videoId) => {
+    // Sort the videos from most recently updated to least recently updated.
+    const sortedVideosWithBookmarksIds = Object.keys(allVideosWithBookmarks).sort((a, b) => {
+        const objA = JSON.parse(allVideosWithBookmarks[a])
+        const objB = JSON.parse(allVideosWithBookmarks[b])
+
+        const dateA = new Date(objA.updatedAt)
+        const dateB = new Date(objB.updatedAt)
+
+        return dateB - dateA
+    })
+
+    sortedVideosWithBookmarksIds.forEach((videoId) => {
         const video = JSON.parse(allVideosWithBookmarks[videoId])
 
         const videoWithBookmarksElem = document.createElement('div')
@@ -269,9 +280,9 @@ const handleDeleteBookmark = async (bookmarkTime) => {
     } else {
         await chrome.storage.sync.set({
             [currentVideoId]: JSON.stringify({
+                ...currentVideoFullObj,
                 bookmarks: filteredCurrentVideoBookmarks,
-                title: currentVideoFullObj.title,
-                thumbnailImageSrc: currentVideoFullObj.thumbnailImageSrc
+                updatedAt: new Date()
             }),
         });
     }

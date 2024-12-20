@@ -52,7 +52,8 @@ const handleAddNewBookmark = async () => {
         bookmarks: newCurrentVideoBookmarks,
         title,
         thumbnailImageSrc,
-        videoType
+        videoType,
+        updatedAt: new Date()
     });
 
     await chrome.storage.sync.set({
