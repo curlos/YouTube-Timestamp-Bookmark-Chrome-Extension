@@ -254,13 +254,18 @@ const handleDeleteBookmark = async (bookmarkTime) => {
 
     const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== bookmarkTime)
 
-    await chrome.storage.sync.set({
-        [currentVideoId]: JSON.stringify({
-            bookmarks: filteredCurrentVideoBookmarks,
-            title: currentVideoFullObj.title,
-            thumbnailImageSrc: currentVideoFullObj.thumbnailImageSrc
-        }),
-    });
+    if (filteredCurrentVideoBookmarks.length === 0) {
+        await chrome.storage.sync.remove(currentVideoId)
+    } else {
+        await chrome.storage.sync.set({
+            [currentVideoId]: JSON.stringify({
+                bookmarks: filteredCurrentVideoBookmarks,
+                title: currentVideoFullObj.title,
+                thumbnailImageSrc: currentVideoFullObj.thumbnailImageSrc
+            }),
+        });
+    }
+
     await handleFilteredBookmarks()
      
 };
@@ -285,7 +290,6 @@ const getAllVideosWithBookmarks = () => {
                 reject(chrome.runtime.lastError);
             } else {
                 allVideosWithBookmarks = items
-
                 resolve(items);
             }
         });
@@ -298,6 +302,10 @@ const getAllVideosWithBookmarks = () => {
  */
 const fetchBookmarks = async () => {
     const obj = await chrome.storage.sync.get(currentVideoId);
-    currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
-    currentVideoFullObj = obj[currentVideoId]
+    const jsonObj = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : {}
+
+    const { bookmarks = [] } = jsonObj
+
+    currentVideoBookmarks = bookmarks
+    currentVideoFullObj = jsonObj
 };
