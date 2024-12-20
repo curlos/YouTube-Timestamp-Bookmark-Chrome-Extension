@@ -139,13 +139,14 @@ const renderSidebarModalWithVideos = async () => {
 
         // When the video container is clicked, navigate to that video's page.
         videoWithBookmarksElem.addEventListener('click', async () => {
-            // TODO: If I'm planning to add "Shorts", then I'll need to a add a type property to the video to state whether it's a "shorts" or "watch"
-            const videoURL = `https://www.youtube.com/watch?v=${videoId}`
+            const videoURL = video.videoType === 'shorts' ? `https://www.youtube.com/shorts/${videoId}` : `https://www.youtube.com/watch?v=${videoId}`
             const activeTab = await getActiveTab()
 
-            chrome.tabs.update(activeTab.id, {
-                url: videoURL
-            })
+            if (currentVideoId !== videoId) {
+                chrome.tabs.update(activeTab.id, {
+                    url: videoURL
+                })
+            }
 
             // Close the popup after navigating to the new video page.
             window.close()

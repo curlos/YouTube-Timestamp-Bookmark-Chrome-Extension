@@ -44,15 +44,15 @@ const handleAddNewBookmark = async () => {
     await fetchBookmarks();
     const newCurrentVideoBookmarks = [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)
 
-    console.log(activeTab)
-
     const title = currentVideoFullObj && currentVideoFullObj.title || activeTab.title
     const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || getThumbnailUrl()
+    const videoType = currentVideoType
 
     const newCurrentVideoBookmarksStr = JSON.stringify({
         bookmarks: newCurrentVideoBookmarks,
         title,
-        thumbnailImageSrc
+        thumbnailImageSrc,
+        videoType
     });
 
     await chrome.storage.sync.set({
