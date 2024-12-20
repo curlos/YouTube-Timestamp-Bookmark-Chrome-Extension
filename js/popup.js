@@ -1,4 +1,5 @@
 let currentVideoBookmarks = []
+let currentVideoBookmarksWithDataUrlByTime = []
 let currentVideoId = null
 let allVideosWithBookmarks = null
 let currentVideoFullObj = null
@@ -19,8 +20,10 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderSidebarModalWithVideos()
 
-            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (newCurrentVideoBookmarks) => {
-                currentVideoBookmarks = newCurrentVideoBookmarks
+            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarksWithFrames) => {
+                currentVideoBookmarks = currentVideoBookmarksWithFrames
+
+                currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
 
                 await renderElemBookmarks();
                 renderDeleteVideoBookmarksButton()
@@ -98,6 +101,8 @@ const renderLeftMenuButton = () => {
 
 const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector('.sidebar-video-list')
+    sidebarVideoListElem.innerHTML = ''
+
     await getAllVideosWithBookmarks()
 
     Object.keys(allVideosWithBookmarks).forEach((videoId) => {
@@ -162,7 +167,8 @@ const renderElemBookmarks = async () => {
     }
 
     for (let i = 0; i < currentVideoBookmarks.length; i++) {
-        const bookmark = currentVideoBookmarks[i]
+        const { time } = currentVideoBookmarks[i]
+        const bookmark = currentVideoBookmarksWithDataUrlByTime[time]
         const isLastIndex = (i === currentVideoBookmarks.length - 1)
 
         await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
@@ -266,14 +272,10 @@ const handleDeleteAllBookmarks = async () => {
 
 const handleFilteredBookmarks = async () => {
     await fetchBookmarks()
+    await getAllVideosWithBookmarks()
 
-    if (currentVideoBookmarks.length === 0) {
-        const deleteVideoBookmarksButtonWrapper = document.querySelector('.delete-video-bookmarks-button-wrapper')
-        deleteVideoBookmarksButtonWrapper.parentNode.removeChild(deleteVideoBookmarksButtonWrapper);
-
-        const bookmarkListElem = document.getElementById("bookmarks");
-        bookmarkListElem.innerHTML = '<i class="row">No bookmarks to show</i>';
-    }
+    renderSidebarModalWithVideos()
+    renderElemBookmarks()
 }
 
 const getAllVideosWithBookmarks = () => {

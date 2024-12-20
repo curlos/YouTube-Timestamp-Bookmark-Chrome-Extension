@@ -186,14 +186,14 @@ body {
     position: relative;
 }
 
-.delete-video-bookmarks-button-wrapper {
+.delete-video-bookmarks-button-wrapper, .delete-all-bookmarks-button-wrapper {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
 }
 
-.delete-video-bookmarks-button {
+.delete-video-bookmarks-button, .delete-all-bookmarks-button {
     background-color: rgba(217, 77, 77, 0.25);
     color: red;
     padding: 8px;
@@ -201,7 +201,7 @@ body {
     cursor: pointer;
 }
 
-.delete-video-bookmarks-button:hover {
+.delete-video-bookmarks-button:hover, .delete-all-bookmarks-button:hover {
     background-color: rgba(217, 77, 77, 0.40);
 }
 .delete-all-bookmarks-button {
