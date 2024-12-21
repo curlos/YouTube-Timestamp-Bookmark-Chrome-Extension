@@ -1,14 +1,13 @@
 // This is needed to get async/await working with "chrome.runtime.onMessage.addListener". Chrome still doesn't support Promise in the returned value of onMessage listener both in ManifestV3 and V2. This code is from StackOverflow: https://stackoverflow.com/questions/53024819/sendresponse-not-waiting-for-async-function-or-promises-resolve
-const { onMessage } = chrome.runtime,
-    { addListener } = onMessage;
+const { onMessage } = chrome.runtime;
+const { addListener } = chrome.runtime.onMessage;
+
 onMessage.addListener = (fn) =>
     addListener.call(onMessage, (msg, sender, respond) => {
         const res = fn(msg, sender, respond);
         if (res instanceof Promise) return !!res.then(respond, console.error);
         if (res !== undefined) respond(res);
     });
-
-chrome.runtime.sendMessage({ type: "ready" });
 
 // Global Variables
 let youtubeRightControls = null;
@@ -32,7 +31,7 @@ const fetchBookmarks = async () => {
 };
 
 /**
- * @descriptionv When the "+" bookmark image is clicked, this function will be ran and will add a bookmark for the current video using the video's current time.
+ * @description Add a new bookmark to the current video using the current time.
  */
 const handleAddNewBookmark = async () => {
     const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
@@ -65,11 +64,17 @@ const handleAddNewBookmark = async () => {
     // Get the updated bookmarks with the newly added one.
     await fetchBookmarks();
 
+    // Open the popup after adding the bookmark to show it in the list of bookmarks.
     await chrome.runtime.sendMessage({ type: "open-popup" });
 };
 
+/**
+ * @description Gets the thumbnail's image URL for a video.
+ * @returns {String}
+ */
 const getThumbnailUrl = () => {
     if (currentVideoType === "watch") {
+        // Luckily, this script DOM element is dynamic on page-by-page basis so even if we go to a new video, it currently has the updated video information.
         const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
 
         for (let scriptJsonElem of scriptJsonElemList) {
@@ -85,6 +90,7 @@ const getThumbnailUrl = () => {
     }
 
     if (currentVideoType === "shorts") {
+        // This doesn't technically get the thumbnail but rather the first frame of the video "frame0". It's possible to get the thumbnail of a short in the elements but as soon as you scroll to the next short, that DOM element will become stale and will reference the previous short (or the first short). Thus, the most reliable "thumbnail" image is the first frame of the video.
         return `https://i.ytimg.com/vi/${currentVideoId}/frame0.jpg`;
     }
 
@@ -92,7 +98,7 @@ const getThumbnailUrl = () => {
 };
 
 /**
- * @description When a new video is loaded, get that video's bookmarks and add the bookmark button to the video player's left controls if it hasn't been added yet.
+ * @description When a new video is loaded, get that video's bookmarks and add the bookmark button to the video player's right controls if it hasn't been added yet.
  */
 const newVideoLoaded = async () => {
     const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
@@ -106,11 +112,14 @@ const newVideoLoaded = async () => {
         if (!bookmarkBtnExists || currentVideoType === "shorts") {
             switch (currentVideoType) {
                 case "watch":
+                    // Add the bookmark button to the "right" controls.
                     const bookmarkBtnElement = createAndGetBookmarkBtnElement();
                     youtubeRightControls = document.getElementsByClassName("ytp-right-controls")[0];
                     youtubeRightControls.insertBefore(bookmarkBtnElement, youtubeRightControls.firstChild);
                     break;
                 case "shorts":
+                    // "Shorts" work differently than normal videos. On a normal video page, you'll have only video element with a set of left and right controls so I'd only have to edit the one set of controls. However, with a short, there's infinite scrolling. For YouTube to have infinite scrolling enabled, they load many "Shorts" at once. So, if we're on a shorts video page, there could be 10-15+ videos loaded in the DOM.
+                    // Because of the above, this means that the control element called "#actions" will appear for each video. So, we have to go through ALL of the actions elements and add the bookmark button to all of the ones that don't have it yet.
                     const actionsElemList = Array.from(document.querySelectorAll("#actions"));
 
                     actionsElemList.forEach((actionsElem) => {
@@ -127,6 +136,10 @@ const newVideoLoaded = async () => {
     }
 };
 
+/**
+ * @description Creates and gets the bookmark SVG icon HTML Button element.
+ * @returns {HTMLButtonElement}
+ */
 const createAndGetBookmarkBtnElement = () => {
     const bookmarkSvgContainer = document.createElement("button");
 
@@ -138,6 +151,7 @@ const createAndGetBookmarkBtnElement = () => {
     return bookmarkSvgContainer;
 };
 
+// Listen to messages from background.js
 chrome.runtime.onMessage.addListener(async (obj) => {
     const { type, value, videoId, videoType, activeTab: backgroundActiveTab } = obj;
 
@@ -153,6 +167,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             currentVideoType = videoType;
             newVideoLoaded();
             break;
+        // For popup.js
         case "play-new-timestamp-in-video":
             videoElem.currentTime = value;
 
@@ -169,9 +184,11 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             }, 1000);
 
             break;
+        // For popup.js
         case "content-get-current-video-bookmarks-with-frames":
             await fetchUserSettings();
 
+            // If we don't need to capture frames, then return the current bookmarks. These bookmarks will have no "thumbnailImageSrc".
             if (!userSettings.captureFrames) {
                 return currentVideoBookmarks;
             }
@@ -192,6 +209,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
             let capturedAtLeastOneFrame = false;
 
+            // Go through the array of video bookmarks and use their "time" and the video element, go and capture the frame of the video at each "time" and store the dataUrl of these frames in a new array.
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];
 
@@ -233,12 +251,18 @@ chrome.runtime.onMessage.addListener(async (obj) => {
     }
 });
 
+/**
+ * @description Fetch the "userSettings" property from Chrome's Storage.
+ */
 const fetchUserSettings = async () => {
     const obj = await chrome.storage.sync.get("userSettings");
     const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj["userSettings"]) : {};
     userSettings = chromeStorageUserSettingsJsonObj;
 };
 
+/**
+ * @description Resets all the global variables to their default values. Useful for when we land on a new video page.
+ */
 const resetGlobalVariables = () => {
     youtubeRightControls = null;
     videoElem = null;
@@ -251,3 +275,6 @@ const resetGlobalVariables = () => {
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
 newVideoLoaded();
+
+// Send a message to background.js telling it that the contentScript is ready.
+chrome.runtime.sendMessage({ type: "ready" });
