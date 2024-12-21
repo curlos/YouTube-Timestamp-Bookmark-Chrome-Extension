@@ -41,6 +41,10 @@ body {
     overflow: auto;
 }
 
+.bookmark-container {
+    width: 100%;
+}
+
 .bookmark-bottom-wrapper {
     display: flex;
     align-items: center;

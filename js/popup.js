@@ -280,11 +280,13 @@ const renderElemBookmarks = async () => {
 };
 
 const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
+    const showCapturedFrames = userSettings.captureFrames
+
     const bookmarkTitleElement = document.createElement("div");
     const controlsElement = document.createElement("div");
     const newBookmarkElement = document.createElement("div");
     const newBookmarkBottomWrapperElement = document.createElement("div");
-    const timestampImgElement = document.createElement("img");
+    const timestampImgElement = showCapturedFrames && document.createElement("img");
 
     bookmarkTitleElement.textContent = formatTime(bookmark.time);
     bookmarkTitleElement.className = "bookmark-title";
@@ -294,9 +296,9 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
 
     controlsElement.className = "bookmark-controls";
 
-    timestampImgElement.src = bookmark.dataUrl;
-    timestampImgElement.className = "timestamp-img";
-    timestampImgElement.addEventListener("click", () => {
+    showCapturedFrames && (timestampImgElement.src = bookmark.dataUrl);
+    showCapturedFrames && (timestampImgElement.className = "timestamp-img");
+    showCapturedFrames && timestampImgElement.addEventListener("click", () => {
         handlePlayVideo(bookmark.time);
     });
 
@@ -316,17 +318,18 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     );
 
     newBookmarkElement.id = "bookmark-" + bookmark.time;
+    newBookmarkElement.className = "bookmark-container"
     newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper";
 
     if (isLastIndex) {
         newBookmarkBottomWrapperElement.classList.add('bookmark-no-bottom-border')
     }
 
-    newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
+    showCapturedFrames && newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
     newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement);
     newBookmarkBottomWrapperElement.appendChild(controlsElement);
 
-    newBookmarkElement.appendChild(timestampImgElement);
+    showCapturedFrames && newBookmarkElement.appendChild(timestampImgElement);
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
 
     bookmarkListElem.appendChild(newBookmarkElement);
