@@ -1,8 +1,17 @@
-async function getActiveTab() {
+/**
+ * @description Get the active tab.
+ * @param {Function} sendResponse
+ * @returns {Object}
+ */
+async function getActiveTab(sendResponse) {
     const tabs = await chrome.tabs.query({
         currentWindow: true,
         active: true,
     });
+
+    if (sendResponse) {
+        sendResponse(tabs[0]);
+    }
 
     return tabs[0];
 }
@@ -96,9 +105,9 @@ const arrayToObjectByKey = (array, keyProperty) => {
 };
 
 /**
- * @description Get the YouTube Shorts Video ID from the URL.
- * @param {String} url - YouTube URL String
- * @returns
+ * @description Parses the URL string to get the Video ID of the YouTube Shorts Video.
+ * @param {String} url 
+ * @returns {String}
  */
 const getYouTubeShortsVideoId = (url) => {
     const match = url.match(/\/shorts\/([^/?]+)/);

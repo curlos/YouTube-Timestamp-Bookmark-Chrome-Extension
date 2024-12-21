@@ -10,6 +10,7 @@ onMessage.addListener = (fn) =>
 
 chrome.runtime.sendMessage({ type: "ready" });
 
+// Global Variables
 let youtubeRightControls = null;
 let videoElem = null;
 let currentVideoId = "";

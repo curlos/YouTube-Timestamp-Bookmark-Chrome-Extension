@@ -1,3 +1,4 @@
+// Global Variables
 let currentVideoBookmarks = [];
 let currentVideoBookmarksWithDataUrlByTime = [];
 let currentVideoId = null;
