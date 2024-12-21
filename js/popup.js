@@ -25,7 +25,7 @@ document.onreadystatechange = async () => {
 
         if (isYouTubeVideo && currentVideoId) {
             // Render everything including the bookmarks for the current video.
-            renderSpinner();
+            renderSpinnerCurrentVideoBookmarks();
             renderLeftMenuButton();
             renderRightSettingsButton();
             renderSidebarModalWithVideos();
@@ -57,7 +57,7 @@ const setCapturedFramesAndRender = () => {
 
             currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
 
-            await renderElemBookmarks();
+            await renderBookmarkElementsForCurrentVideo();
             renderDeleteVideoBookmarksButton();
         },
     );
@@ -88,7 +88,7 @@ const renderDeleteVideoBookmarksButton = () => {
 };
 
 /**
- * @description Render the "Delete All Bookmarks" button at the bottom of the "Video With Bookmarks" sidebar modal view. When clicked, it will remove all videos and bookmarks from
+ * @description Render the "Delete All Bookmarks" button at the bottom of the "Video With Bookmarks" sidebar modal view. When clicked, it will remove all videos and their bookmarks from the Chrome Storage.
  */
 const renderDeleteAllBookmarksButton = async () => {
     await getAllVideosWithBookmarks();
@@ -116,6 +116,9 @@ const renderDeleteAllBookmarksButton = async () => {
     sidebarVideoListElem.appendChild(deleteAllBookmarksButtonWrapper);
 };
 
+/**
+ * @description Renders the left "menu" button that when clicked will open or close the "Videos With Bookmarks" sidebar modal.
+ */
 const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu");
@@ -145,6 +148,9 @@ const renderLeftMenuButton = () => {
     });
 };
 
+/**
+ * @description Render the right "Settings" button that when clicked will open or close the "Settings" sidebar modal view.
+ */
 const renderRightSettingsButton = () => {
     const settingsDiv = document.getElementById("settings-svg-wrapper");
     settingsDiv.innerHTML = getIconSVG("settings");
@@ -174,6 +180,9 @@ const renderRightSettingsButton = () => {
     });
 };
 
+/**
+ * @description Render a sidebar modal that shows a list of videos with their thumbnail image, title, and number of bookmarks.
+ */
 const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector(".sidebar-video-list");
     sidebarVideoListElem.innerHTML = "";
@@ -181,7 +190,7 @@ const renderSidebarModalWithVideos = async () => {
     await getAllVideosWithBookmarks();
 
     // Sort the videos from most recently updated to least recently updated.
-    const sortedVideosWithBookmarksIds = Object.keys(allVideosWithBookmarks).sort((a, b) => {
+    const sortedVideosWithBookmarksVideoIds = Object.keys(allVideosWithBookmarks).sort((a, b) => {
         const objA = JSON.parse(allVideosWithBookmarks[a]);
         const objB = JSON.parse(allVideosWithBookmarks[b]);
 
@@ -191,7 +200,8 @@ const renderSidebarModalWithVideos = async () => {
         return dateB - dateA;
     })
 
-    sortedVideosWithBookmarksIds.forEach((videoId) => {
+    // Go through all the videos and render the thumbnail image, video title, and the number of bookmarks for that video.
+    sortedVideosWithBookmarksVideoIds.forEach((videoId) => {
         const video = JSON.parse(allVideosWithBookmarks[videoId]);
 
         const videoWithBookmarksElem = document.createElement("div");
@@ -240,6 +250,9 @@ const renderSidebarModalWithVideos = async () => {
     await renderDeleteAllBookmarksButton();
 };
 
+/**
+ * @description Render the "Settings" modal.
+ */
 const renderSettingsModalContent = async () => {
     await fetchUserSettings();
 
@@ -272,15 +285,18 @@ const renderSettingsModalContent = async () => {
 
         if (isChecked) {
             // If "Capture Frames" is checked, then show the loading spinner and send the message to content script to capture frames at the specified timestamps.
-            renderSpinner();
+            renderSpinnerCurrentVideoBookmarks();
             setCapturedFramesAndRender();
         } else {
-            await renderElemBookmarks();
+            await renderBookmarkElementsForCurrentVideo();
         }
     });
 };
 
-const renderSpinner = () => {
+/**
+ * @description Render the blue spinning loader while we wait for the bookmarks for the current video to be fetched.
+ */
+const renderSpinnerCurrentVideoBookmarks = () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
@@ -289,7 +305,11 @@ const renderSpinner = () => {
     bookmarkListElem.appendChild(loadingSpinnerElem);
 };
 
-const renderElemBookmarks = async () => {
+/**
+ * 
+ * @returns Render the list
+ */
+const renderBookmarkElementsForCurrentVideo = async () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
@@ -306,7 +326,12 @@ const renderElemBookmarks = async () => {
         await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
     }
 };
-
+/**
+ * @description Create a bookmark element and append it to the parent "bookmarkListElem". This will contain the captured frame for the bookmark's time stamp (if "captureFrames" is turned on), the timestamp number, a "play" button that will jump to that point in the video, and a "delete" button that will remove the bookmark.
+ * @param {HTMLElement} bookmarkListElem 
+ * @param {Object} bookmark 
+ * @param {Boolean} isLastIndex 
+ */
 const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     const showCapturedFrames = userSettings.captureFrames;
 
@@ -364,15 +389,25 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     bookmarkListElem.appendChild(newBookmarkElement);
 };
 
-const setControlBookmarkSVGElem = (name, eventListener, controlParentElement) => {
+/**
+ * @description Create a new element with an SVG icon and a callback that runs when the element is clicked.
+ * @param {String} name 
+ * @param {Function} callback 
+ * @param {HTMLElement} controlParentElement 
+ */
+const setControlBookmarkSVGElem = (name, callback, controlParentElement) => {
     const controlElement = document.createElement("div");
     controlElement.innerHTML = getIconSVG(name);
     controlElement.className = "svg-wrapper";
 
-    controlElement.addEventListener("click", eventListener);
+    controlElement.addEventListener("click", callback);
     controlParentElement.appendChild(controlElement);
 };
 
+/**
+ * @description Sends a message from the "popup.js" to "background.js" who will then send a message to "contentScript.js" to change the video element's "currentTime" to "bookmarkTime".
+ * @param {Number} bookmarkTime 
+ */
 const handlePlayVideo = async (bookmarkTime) => {
     const activeTab = await getActiveTab();
 
@@ -382,6 +417,10 @@ const handlePlayVideo = async (bookmarkTime) => {
     });
 };
 
+/**
+ * @description Delete a bookmark from the current video's "bookmarks" array. If the current video has no more bookmarks left after deleting this, then remove the video's key-value pair from the Chrome Storage.
+ * @param {Number} bookmarkTime 
+ */
 const handleDeleteBookmark = async (bookmarkTime) => {
     const bookmarkElementToDelete = document.getElementById("bookmark-" + bookmarkTime);
     bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
@@ -405,19 +444,24 @@ const handleDeleteBookmark = async (bookmarkTime) => {
     await handleFilteredBookmarks();
 };
 
+/**
+ * @description After we have made a change to the bookmarks (by adding or deleting one or more of them), running this function will re-fetch the bookmarks and re-render any elements that use these bookmarks so that we use the latest information and views.
+ */
 const handleFilteredBookmarks = async () => {
     await fetchBookmarks();
     await getAllVideosWithBookmarks();
 
     renderSidebarModalWithVideos();
-    renderElemBookmarks();
+    renderBookmarkElementsForCurrentVideo();
 };
 
+/**
+ * @description Get all the videos with bookmarks - will exclude the "userSettings" key-value pair since that's not a video.
+ */
 const getAllVideosWithBookmarks = () => {
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get(null, function (items) {
             if (chrome.runtime.lastError) {
-                console.log('Chrome run time error!!!!')
                 reject(chrome.runtime.lastError);
             } else {
                 const { userSettings, ...itemsWithoutUserSettings } = items
@@ -443,6 +487,9 @@ const fetchBookmarks = async () => {
     currentVideoFullObj = jsonObj;
 };
 
+/**
+ * @description Get the user settings from Chrome's Storage.
+ */
 const fetchUserSettings = async () => {
     const obj = await chrome.storage.sync.get("userSettings");
     const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj["userSettings"]) : {};
