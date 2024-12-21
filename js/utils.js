@@ -116,11 +116,12 @@ const getIconSVG = (name, color = "white", width = "16px", height = "16px") => {
  * @description Using a "keyProperty", go through an array of objects and create a new object with the keys being the value of the "keyProperty" for each object.
  * @param {Array} array 
  * @param {any} keyProperty 
+ * @param {Boolean} isNumberAndRoundDown Only used for a very specific use case. "time" comes back as a decimal. This will round it down to a whole number.
  * @returns 
  */
-const arrayToObjectByKey = (array, keyProperty) => {
+const arrayToObjectByKey = (array, keyProperty, isNumberAndRoundDown = false) => {
     return array.reduce((acc, obj) => {
-        const key = keyProperty ? obj[keyProperty] : obj;
+        const key = keyProperty ? (isNumberAndRoundDown ? Math.floor(obj[keyProperty]) : obj[keyProperty]) : obj;
         acc[key] = obj;
         return acc;
     }, {});

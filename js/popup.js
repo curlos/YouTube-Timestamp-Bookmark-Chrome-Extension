@@ -52,7 +52,7 @@ const setCapturedFramesAndRender = () => {
         async (currentVideoBookmarksWithFrames) => {
             currentVideoBookmarks = currentVideoBookmarksWithFrames;
 
-            currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time");
+            currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
 
             await renderElemBookmarks();
             renderDeleteVideoBookmarksButton();
@@ -292,7 +292,7 @@ const renderElemBookmarks = async () => {
 
     for (let i = 0; i < currentVideoBookmarks.length; i++) {
         const { time } = currentVideoBookmarks[i];
-        const bookmark = currentVideoBookmarksWithDataUrlByTime[time];
+        const bookmark = currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
         const isLastIndex = i === currentVideoBookmarks.length - 1;
 
         await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
@@ -308,7 +308,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     const newBookmarkBottomWrapperElement = document.createElement("div");
     const timestampImgElement = showCapturedFrames && document.createElement("img");
 
-    bookmarkTitleElement.textContent = formatTime(bookmark.time);
+    bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
     bookmarkTitleElement.className = "bookmark-title";
     bookmarkTitleElement.addEventListener("click", () => {
         handlePlayVideo(bookmark.time);

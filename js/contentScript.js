@@ -39,7 +39,7 @@ const handleAddNewBookmark = async () => {
 
     const currentTime = videoElem.currentTime;
     const newBookmark = {
-        time: Math.floor(currentTime),
+        time: currentTime,
     };
 
     await fetchBookmarks();
@@ -205,22 +205,23 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             const newCurrentVideoBookmarksWithFrames = [];
 
             const currentVideoBookmarksWithFramesByTime =
-                currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, "time");
+                currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
 
             let capturedAtLeastOneFrame = false;
 
             // Go through the array of video bookmarks and use their "time" and the video element, go and capture the frame of the video at each "time" and store the dataUrl of these frames in a new array.
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];
+                const bookmarkTimeKey = Math.floor(bookmark.time)
 
                 const alreadyHasFrame =
                     currentVideoBookmarksWithFramesByTime &&
-                    currentVideoBookmarksWithFramesByTime[bookmark.time] &&
-                    currentVideoBookmarksWithFramesByTime[bookmark.time].dataUrl;
+                    currentVideoBookmarksWithFramesByTime[bookmarkTimeKey] &&
+                    currentVideoBookmarksWithFramesByTime[bookmarkTimeKey].dataUrl;
 
                 // If we already have the captured frame for the bookmark at that time, then use the cached frame.
                 if (alreadyHasFrame) {
-                    const bookmarkWithFrame = currentVideoBookmarksWithFramesByTime[bookmark.time];
+                    const bookmarkWithFrame = currentVideoBookmarksWithFramesByTime[bookmarkTimeKey];
                     newCurrentVideoBookmarksWithFrames.push(bookmarkWithFrame);
                     continue;
                 }
