@@ -188,8 +188,11 @@ chrome.runtime.onMessage.addListener(async (obj) => {
         case "content-get-current-video-bookmarks-with-frames":
             await fetchUserSettings();
 
+            const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
+
             // If we don't need to capture frames, then return the current bookmarks. These bookmarks will have no "thumbnailImageSrc".
             if (!userSettings.captureFrames) {
+                bookmarkButton.disabled = false;
                 return currentVideoBookmarks;
             }
 
@@ -245,7 +248,6 @@ chrome.runtime.onMessage.addListener(async (obj) => {
                 videoElem.currentTime = timestampBeforeCapturing;
             }
 
-            const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
             bookmarkButton.disabled = false;
 
             return newCurrentVideoBookmarksWithFrames;

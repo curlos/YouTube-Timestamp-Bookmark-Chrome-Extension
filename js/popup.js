@@ -24,6 +24,7 @@ document.onreadystatechange = async () => {
         }
 
         if (isYouTubeVideo && currentVideoId) {
+            // Render everything including the bookmarks for the current video.
             renderSpinner();
             renderLeftMenuButton();
             renderRightSettingsButton();
@@ -32,11 +33,13 @@ document.onreadystatechange = async () => {
 
             setCapturedFramesAndRender();
         } else {
+            // If it's not a YouTube video, then render everything but the list of bookmarks for a specific video.
             renderLeftMenuButton();
             renderRightSettingsButton();
             renderSidebarModalWithVideos();
             renderSettingsModalContent();
 
+            // By default, when the popup is opened on a non-YouTube video page, show the list of videos that have been bookmarked at least once.
             document.querySelector(".sidebar-modal").classList.add("sidebar-shown");
             document.querySelector(".title").textContent = "Videos With Bookmarks";
         }
@@ -44,7 +47,7 @@ document.onreadystatechange = async () => {
 };
 
 /**
- * @description Send the message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
+ * @description Send the message to background.js that will then send a message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
  */
 const setCapturedFramesAndRender = () => {
     chrome.runtime.sendMessage(
@@ -60,6 +63,9 @@ const setCapturedFramesAndRender = () => {
     );
 };
 
+/**
+ * @description Render the "Delete Video Bookmarks" button at the bottom of the "Bookmarks For This Video" view.
+ */
 const renderDeleteVideoBookmarksButton = () => {
     if (currentVideoBookmarks.length === 0) {
         return;
@@ -73,13 +79,17 @@ const renderDeleteVideoBookmarksButton = () => {
     deleteVideoBookmarksButton.textContent = "Delete Video Bookmarks";
 
     deleteVideoBookmarksButton.addEventListener("click", async () => {
-        await handleDeleteAllBookmarks();
+        await chrome.storage.sync.remove(currentVideoId);
+        await handleFilteredBookmarks();
     });
 
     deleteVideoBookmarksButtonWrapper.appendChild(deleteVideoBookmarksButton);
     document.querySelector(".bookmarks").appendChild(deleteVideoBookmarksButtonWrapper);
 };
 
+/**
+ * @description Render the "Delete All Bookmarks" button at the bottom of the "Video With Bookmarks" sidebar modal view. When clicked, it will remove all videos and bookmarks from
+ */
 const renderDeleteAllBookmarksButton = async () => {
     await getAllVideosWithBookmarks();
 
@@ -87,24 +97,22 @@ const renderDeleteAllBookmarksButton = async () => {
         return;
     }
 
+    const sidebarVideoListElem = document.querySelector(".sidebar-video-list");
+
     const deleteAllBookmarksButtonWrapper = document.createElement("div");
-    deleteAllBookmarksButtonWrapper.className = "delete-video-bookmarks-button-wrapper";
+    deleteAllBookmarksButtonWrapper.className = "delete-all-bookmarks-button-wrapper";
 
     const deleteAllBookmarksButton = document.createElement("div");
-    deleteAllBookmarksButton.className = "delete-video-bookmarks-button delete-all-bookmarks-button";
+    deleteAllBookmarksButton.className = "delete-all-bookmarks-button";
     deleteAllBookmarksButton.textContent = "Delete All Bookmarks";
 
-    deleteAllBookmarksButton.addEventListener("click", async () => {
-        await handleDeleteAllBookmarks();
+    deleteAllBookmarksButtonWrapper.addEventListener("click", async () => {
+        const videoIdsToRemove = Object.keys(allVideosWithBookmarks)
+        await Promise.all(videoIdsToRemove.map((videoId) => chrome.storage.sync.remove(videoId)))
+        await handleFilteredBookmarks();
     });
 
     deleteAllBookmarksButtonWrapper.appendChild(deleteAllBookmarksButton);
-
-    deleteAllBookmarksButtonWrapper.addEventListener("click", async () => {
-        await chrome.storage.sync.clear();
-    });
-
-    const sidebarVideoListElem = document.querySelector(".sidebar-video-list");
     sidebarVideoListElem.appendChild(deleteAllBookmarksButtonWrapper);
 };
 
@@ -181,7 +189,7 @@ const renderSidebarModalWithVideos = async () => {
         const dateB = new Date(objB.updatedAt);
 
         return dateB - dateA;
-    }).filter((videoId) => videoId !== 'userSettings');
+    })
 
     sortedVideosWithBookmarksIds.forEach((videoId) => {
         const video = JSON.parse(allVideosWithBookmarks[videoId]);
@@ -397,11 +405,6 @@ const handleDeleteBookmark = async (bookmarkTime) => {
     await handleFilteredBookmarks();
 };
 
-const handleDeleteAllBookmarks = async () => {
-    await chrome.storage.sync.remove(currentVideoId);
-    await handleFilteredBookmarks();
-};
-
 const handleFilteredBookmarks = async () => {
     await fetchBookmarks();
     await getAllVideosWithBookmarks();
@@ -417,7 +420,9 @@ const getAllVideosWithBookmarks = () => {
                 console.log('Chrome run time error!!!!')
                 reject(chrome.runtime.lastError);
             } else {
-                allVideosWithBookmarks = items;
+                const { userSettings, ...itemsWithoutUserSettings } = items
+
+                allVideosWithBookmarks = itemsWithoutUserSettings;
                 resolve(items);
             }
         });
