@@ -216,6 +216,14 @@ const renderSidebarModalWithVideos = async () => {
     await renderDeleteAllBookmarksButton()
 }
 
+const renderSettingsModalContent = async () => {
+    const sidebarVideoListElem = document.querySelector('.sidebar-settings-list')
+    sidebarVideoListElem.innerHTML = ''
+
+    // Get the settings from chrome storage
+    
+}
+
 const renderSpinner = () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = ''
