@@ -1,10 +1,4 @@
-// Global Variables
-let currentVideoBookmarks = [];
-let currentVideoBookmarksWithDataUrlByTime = [];
-let currentVideoId = null;
-let allVideosWithBookmarks = null;
-let currentVideoFullObj = null;
-let userSettings = null;
+console.log(state)
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
@@ -20,10 +14,10 @@ document.onreadystatechange = async () => {
         const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo;
 
         if (isYouTubeVideo) {
-            currentVideoId = isYouTubeFullVideo ? urlParams.get("v") : getYouTubeShortsVideoId(activeTab.url);
+            state.currentVideoId = isYouTubeFullVideo ? urlParams.get("v") : getYouTubeShortsVideoId(activeTab.url);
         }
 
-        if (isYouTubeVideo && currentVideoId) {
+        if (isYouTubeVideo && state.currentVideoId) {
             // Render everything including the bookmarks for the current video.
             renderSpinnerCurrentVideoBookmarks();
             renderLeftMenuButton();
@@ -53,12 +47,11 @@ const setCapturedFramesAndRender = () => {
     chrome.runtime.sendMessage(
         { type: "background-get-current-video-bookmarks-with-frames" },
         async (currentVideoBookmarksWithFrames) => {
-            currentVideoBookmarks = currentVideoBookmarksWithFrames;
+            state.currentVideoBookmarks = currentVideoBookmarksWithFrames;
 
-            currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
+            state.currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
 
             await renderBookmarkElementsForCurrentVideo();
-            renderDeleteVideoBookmarksButton();
         },
     );
 };
@@ -67,7 +60,7 @@ const setCapturedFramesAndRender = () => {
  * @description Render the "Delete Video Bookmarks" button at the bottom of the "Bookmarks For This Video" view.
  */
 const renderDeleteVideoBookmarksButton = () => {
-    if (currentVideoBookmarks.length === 0) {
+    if (state.currentVideoBookmarks.length === 0) {
         return;
     }
 
@@ -79,7 +72,7 @@ const renderDeleteVideoBookmarksButton = () => {
     deleteVideoBookmarksButton.textContent = "Delete Video Bookmarks";
 
     deleteVideoBookmarksButton.addEventListener("click", async () => {
-        await chrome.storage.sync.remove(currentVideoId);
+        await chrome.storage.sync.remove(state.currentVideoId);
         await handleFilteredBookmarks();
     });
 
@@ -93,7 +86,7 @@ const renderDeleteVideoBookmarksButton = () => {
 const renderDeleteAllBookmarksButton = async () => {
     await getAllVideosWithBookmarks();
 
-    if (!allVideosWithBookmarks || Object.keys(allVideosWithBookmarks).length === 0) {
+    if (!state.allVideosWithBookmarks || Object.keys(state.allVideosWithBookmarks).length === 0) {
         return;
     }
 
@@ -107,7 +100,7 @@ const renderDeleteAllBookmarksButton = async () => {
     deleteAllBookmarksButton.textContent = "Delete All Bookmarks";
 
     deleteAllBookmarksButtonWrapper.addEventListener("click", async () => {
-        const videoIdsToRemove = Object.keys(allVideosWithBookmarks)
+        const videoIdsToRemove = Object.keys(state.allVideosWithBookmarks)
         await Promise.all(videoIdsToRemove.map((videoId) => chrome.storage.sync.remove(videoId)))
         await handleFilteredBookmarks();
     });
@@ -137,7 +130,7 @@ const renderLeftMenuButton = () => {
             return;
         }
 
-        if (currentVideoId) {
+        if (state.currentVideoId) {
             document.querySelector(".title").textContent = "Bookmarks For This Video";
             return;
         }
@@ -169,7 +162,7 @@ const renderRightSettingsButton = () => {
             return;
         }
 
-        if (currentVideoId) {
+        if (state.currentVideoId) {
             document.querySelector(".title").textContent = "Bookmarks For This Video";
             return;
         }
@@ -190,9 +183,9 @@ const renderSidebarModalWithVideos = async () => {
     await getAllVideosWithBookmarks();
 
     // Sort the videos from most recently updated to least recently updated.
-    const sortedVideosWithBookmarksVideoIds = Object.keys(allVideosWithBookmarks).sort((a, b) => {
-        const objA = JSON.parse(allVideosWithBookmarks[a]);
-        const objB = JSON.parse(allVideosWithBookmarks[b]);
+    const sortedVideosWithBookmarksVideoIds = Object.keys(state.allVideosWithBookmarks).sort((a, b) => {
+        const objA = JSON.parse(state.allVideosWithBookmarks[a]);
+        const objB = JSON.parse(state.allVideosWithBookmarks[b]);
 
         const dateA = new Date(objA.updatedAt);
         const dateB = new Date(objB.updatedAt);
@@ -202,7 +195,7 @@ const renderSidebarModalWithVideos = async () => {
 
     // Go through all the videos and render the thumbnail image, video title, and the number of bookmarks for that video.
     sortedVideosWithBookmarksVideoIds.forEach((videoId) => {
-        const video = JSON.parse(allVideosWithBookmarks[videoId]);
+        const video = JSON.parse(state.allVideosWithBookmarks[videoId]);
 
         const videoWithBookmarksElem = document.createElement("div");
         videoWithBookmarksElem.className = "video-with-bookmarks";
@@ -234,7 +227,7 @@ const renderSidebarModalWithVideos = async () => {
                     : `https://www.youtube.com/watch?v=${videoId}`;
             const activeTab = await getActiveTab();
 
-            if (currentVideoId !== videoId) {
+            if (state.currentVideoId !== videoId) {
                 chrome.tabs.update(activeTab.id, {
                     url: videoURL,
                 });
@@ -257,7 +250,7 @@ const renderSettingsModalContent = async () => {
     await fetchUserSettings();
 
     // if there are no user settings, set the default settings.
-    if (!userSettings) {
+    if (!state.userSettings) {
         const defaultUserSettings = {
             captureFrames: true,
         };
@@ -270,7 +263,7 @@ const renderSettingsModalContent = async () => {
     }
 
     const captureFramesCheckbox = document.getElementById("capture-frames-checkbox");
-    captureFramesCheckbox.checked = userSettings.captureFrames ? true : false;
+    captureFramesCheckbox.checked = state.userSettings.captureFrames ? true : false;
 
     captureFramesCheckbox.addEventListener("click", async (e) => {
         const isChecked = e.target.checked;
@@ -313,18 +306,20 @@ const renderBookmarkElementsForCurrentVideo = async () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
-    if (currentVideoBookmarks.length === 0) {
+    if (state.currentVideoBookmarks.length === 0) {
         bookmarkListElem.innerHTML = '<i class="row">No bookmarks to show</i>';
         return;
     }
 
-    for (let i = 0; i < currentVideoBookmarks.length; i++) {
-        const { time } = currentVideoBookmarks[i];
-        const bookmark = currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
-        const isLastIndex = i === currentVideoBookmarks.length - 1;
+    for (let i = 0; i < state.currentVideoBookmarks.length; i++) {
+        const { time } = state.currentVideoBookmarks[i];
+        const bookmark = state.currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
+        const isLastIndex = i === state.currentVideoBookmarks.length - 1;
 
         await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
     }
+
+    renderDeleteVideoBookmarksButton()
 };
 /**
  * @description Create a bookmark element and append it to the parent "bookmarkListElem". This will contain the captured frame for the bookmark's time stamp (if "captureFrames" is turned on), the timestamp number, a "play" button that will jump to that point in the video, and a "delete" button that will remove the bookmark.
@@ -333,7 +328,7 @@ const renderBookmarkElementsForCurrentVideo = async () => {
  * @param {Boolean} isLastIndex 
  */
 const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
-    const showCapturedFrames = userSettings.captureFrames;
+    const showCapturedFrames = state.userSettings.captureFrames;
 
     const bookmarkTitleElement = document.createElement("div");
     const controlsElement = document.createElement("div");
@@ -427,14 +422,14 @@ const handleDeleteBookmark = async (bookmarkTime) => {
 
     await fetchBookmarks();
 
-    const filteredCurrentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== bookmarkTime);
+    const filteredCurrentVideoBookmarks = state.currentVideoBookmarks.filter((b) => b.time !== bookmarkTime);
 
     if (filteredCurrentVideoBookmarks.length === 0) {
-        await chrome.storage.sync.remove(currentVideoId);
+        await chrome.storage.sync.remove(state.currentVideoId);
     } else {
         await chrome.storage.sync.set({
-            [currentVideoId]: JSON.stringify({
-                ...currentVideoFullObj,
+            [state.currentVideoId]: JSON.stringify({
+                ...state.currentVideoFullObj,
                 bookmarks: filteredCurrentVideoBookmarks,
                 updatedAt: new Date(),
             }),
@@ -466,7 +461,7 @@ const getAllVideosWithBookmarks = () => {
             } else {
                 const { userSettings, ...itemsWithoutUserSettings } = items
 
-                allVideosWithBookmarks = itemsWithoutUserSettings;
+                state.allVideosWithBookmarks = itemsWithoutUserSettings;
                 resolve(items);
             }
         });
@@ -478,13 +473,13 @@ const getAllVideosWithBookmarks = () => {
  * @returns {Array<Object>}
  */
 const fetchBookmarks = async () => {
-    const obj = await chrome.storage.sync.get(currentVideoId);
-    const jsonObj = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]) : {};
+    const obj = await chrome.storage.sync.get(state.currentVideoId);
+    const jsonObj = obj[state.currentVideoId] ? JSON.parse(obj[state.currentVideoId]) : {};
 
     const { bookmarks = [] } = jsonObj;
 
-    currentVideoBookmarks = bookmarks;
-    currentVideoFullObj = jsonObj;
+    state.currentVideoBookmarks = bookmarks;
+    state.currentVideoFullObj = jsonObj;
 };
 
 /**
@@ -493,5 +488,5 @@ const fetchBookmarks = async () => {
 const fetchUserSettings = async () => {
     const obj = await chrome.storage.sync.get("userSettings");
     const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj["userSettings"]) : {};
-    userSettings = chromeStorageUserSettingsJsonObj;
+    state.userSettings = chromeStorageUserSettingsJsonObj;
 };
