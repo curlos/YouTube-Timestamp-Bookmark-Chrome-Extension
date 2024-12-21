@@ -32,7 +32,7 @@ body {
     border-color: #66afe9;
 }
 
-.bookmarks {
+#bookmarks, #settings {
     padding: 8px;
     display: flex;
     flex-direction: column;
@@ -126,7 +126,7 @@ body {
     padding: 8px;
 }
 
-.sidebar-modal {
+.sidebar-modal, .sidebar-modal-right {
     position: absolute; /* Ensures positioning within the popup */
     top: 0;
     left: -100%; /* Start hidden to the left */
@@ -135,16 +135,29 @@ body {
     background-color: rgb(50, 50, 50);
 }
 
+.sidebar-modal-right {
+    left: auto;
+    right: -100%;
+}
+
 .sidebar-transition {
     box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
     transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
+}
+
+.sidebar-transition-right {
+    transition: right 0.3s ease; /* Smoothes the transition of the sidebar */
 }
 
 .sidebar-shown {
     left: 0; /* Slides the sidebar into view */
 }
 
-.sidebar-video-list {
+.sidebar-shown-right {
+    right: 0;
+}
+
+.sidebar-video-list, .sidebar-settings-list {
     height: 550px;
     overflow: auto;
 }
@@ -185,8 +198,9 @@ body {
     scrollbar-color: #919191 transparent;
 }
 
-.bookmarks-outer-wrapper {
+.bookmarks-outer-wrapper{
     position: relative;
+    width: 100%;
 }
 
 .delete-video-bookmarks-button-wrapper, .delete-all-bookmarks-button-wrapper {
@@ -210,4 +224,8 @@ body {
 .delete-all-bookmarks-button {
     margin-top: 12px;
     margin-right: 8px;
+}
+
+svg {
+    overflow: visible;
 }

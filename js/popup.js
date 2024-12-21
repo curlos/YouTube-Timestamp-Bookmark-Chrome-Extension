@@ -23,8 +23,11 @@ document.onreadystatechange = async () => {
 
         if (currentVideoId) {
             renderSpinner()
+
             renderLeftMenuButton()
+            renderRightSettingsButton()
             renderSidebarModalWithVideos()
+            
 
             chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarksWithFrames) => {
                 currentVideoBookmarks = currentVideoBookmarksWithFrames
@@ -35,7 +38,10 @@ document.onreadystatechange = async () => {
                 renderDeleteVideoBookmarksButton()
             });
         } else {
+            renderLeftMenuButton()
+            renderRightSettingsButton()
             renderSidebarModalWithVideos()
+
             document.querySelector('.sidebar-modal').classList.add('sidebar-shown');
             document.querySelector('.title').textContent = 'Videos With Bookmarks'
         }
@@ -94,16 +100,57 @@ const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu")
     menuDiv.addEventListener('click', () => {
-        document.querySelector('.sidebar-modal').classList.add('sidebar-transition')
-        document.querySelector('.sidebar-modal').classList.toggle('sidebar-shown');
+        const sidebarSettingsWrapper = document.getElementById('sidebar-settings-wrapper')
+        sidebarSettingsWrapper.classList.remove('sidebar-shown-right')
 
-        const isSidebarModalOpen = document.querySelector('.sidebar-modal').classList.contains('sidebar-shown')
+        const sidebarVideosWrapper = document.getElementById('sidebar-videos-wrapper')
+        sidebarVideosWrapper.classList.add('sidebar-transition')
+        sidebarVideosWrapper.classList.toggle('sidebar-shown');
+
+        const isSidebarModalOpen = sidebarVideosWrapper.classList.contains('sidebar-shown')
 
         if (isSidebarModalOpen) {
             document.querySelector('.title').textContent = 'Videos With Bookmarks'
-        } else {
-            document.querySelector('.title').textContent = 'Bookmarks For This Video'
+            return
         }
+
+        if (currentVideoId) {
+            document.querySelector('.title').textContent = 'Bookmarks For This Video'
+            return
+        }
+
+        // If the sidebar video list modal is not open and there's no video id, then show the settings sidebar modal
+        sidebarSettingsWrapper.classList.add('sidebar-shown-right')
+        document.querySelector('.title').textContent = 'Settings'
+    })
+}
+
+const renderRightSettingsButton = () => {
+    const settingsDiv = document.getElementById("settings-svg-wrapper");
+    settingsDiv.innerHTML = getIconSVG("settings")
+    settingsDiv.addEventListener('click', () => {
+        const sidebarVideosWrapper = document.getElementById('sidebar-videos-wrapper')
+        sidebarVideosWrapper.classList.remove('sidebar-shown')
+
+        const sidebarSettingsWrapper = document.getElementById('sidebar-settings-wrapper')
+        sidebarSettingsWrapper.classList.add('sidebar-transition-right')
+        sidebarSettingsWrapper.classList.toggle('sidebar-shown-right');
+
+        const isSidebarRightModalOpen = sidebarSettingsWrapper.classList.contains('sidebar-shown-right')
+
+        if (isSidebarRightModalOpen) {
+            document.querySelector('.title').textContent = 'Settings'
+            return
+        }
+
+        if (currentVideoId) {
+            document.querySelector('.title').textContent = 'Bookmarks For This Video'
+            return
+        }
+
+        // If the sidebar settings modal is not open and there's no video id, then show the sidebar video list modal
+        sidebarVideosWrapper.classList.add('sidebar-shown')
+        document.querySelector('.title').textContent = 'Videos With Bookmarks'
     })
 }
 
