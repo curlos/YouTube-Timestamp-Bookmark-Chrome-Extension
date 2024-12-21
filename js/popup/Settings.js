@@ -1,7 +1,11 @@
+import { state } from "./state.js";
+import { fetchUserSettings } from "./helpers.js";
+import { renderSpinnerCurrentVideoBookmarks, setCapturedFramesAndRender, renderBookmarkElementsForCurrentVideo } from './currentVideoBookmarks.js'
+
 /**
  * @description Render the right "Settings" button that when clicked will open or close the "Settings" sidebar modal view.
  */
-const renderRightSettingsButton = () => {
+export const renderRightSettingsButton = () => {
     const settingsDiv = document.getElementById("settings-svg-wrapper");
     settingsDiv.innerHTML = getIconSVG("settings");
     settingsDiv.addEventListener("click", () => {
@@ -33,7 +37,7 @@ const renderRightSettingsButton = () => {
 /**
  * @description Render the "Settings" modal.
  */
-const renderSettingsModalContent = async () => {
+export const renderSettingsModalContent = async () => {
     await fetchUserSettings();
 
     // if there are no user settings, set the default settings.

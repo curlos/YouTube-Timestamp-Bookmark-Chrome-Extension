@@ -1,7 +1,10 @@
+import { state } from "./state.js";
+import { handleFilteredBookmarks, fetchBookmarks } from './helpers.js'
+
 /**
  * @description Send the message to background.js that will then send a message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
  */
-const setCapturedFramesAndRender = () => {
+export const setCapturedFramesAndRender = () => {
     chrome.runtime.sendMessage(
         { type: "background-get-current-video-bookmarks-with-frames" },
         async (currentVideoBookmarksWithFrames) => {
@@ -17,7 +20,7 @@ const setCapturedFramesAndRender = () => {
 /**
  * @description Render the "Delete Video Bookmarks" button at the bottom of the "Bookmarks For This Video" view.
  */
-const renderDeleteVideoBookmarksButton = () => {
+export const renderDeleteVideoBookmarksButton = () => {
     if (state.currentVideoBookmarks.length === 0) {
         return;
     }
@@ -41,7 +44,7 @@ const renderDeleteVideoBookmarksButton = () => {
 /**
  * @description Render the blue spinning loader while we wait for the bookmarks for the current video to be fetched.
  */
-const renderSpinnerCurrentVideoBookmarks = () => {
+export const renderSpinnerCurrentVideoBookmarks = () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
@@ -54,7 +57,7 @@ const renderSpinnerCurrentVideoBookmarks = () => {
  * 
  * @returns Render the list
  */
-const renderBookmarkElementsForCurrentVideo = async () => {
+export const renderBookmarkElementsForCurrentVideo = async () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
@@ -80,7 +83,7 @@ const renderBookmarkElementsForCurrentVideo = async () => {
  * @param {Object} bookmark 
  * @param {Boolean} isLastIndex 
  */
-const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
+export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
     const showCapturedFrames = state.userSettings.captureFrames;
 
     const bookmarkTitleElement = document.createElement("div");
@@ -143,7 +146,7 @@ const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
  * @param {Function} callback 
  * @param {HTMLElement} controlParentElement 
  */
-const setControlBookmarkSVGElem = (name, callback, controlParentElement) => {
+export const setControlBookmarkSVGElem = (name, callback, controlParentElement) => {
     const controlElement = document.createElement("div");
     controlElement.innerHTML = getIconSVG(name);
     controlElement.className = "svg-wrapper";
@@ -156,7 +159,7 @@ const setControlBookmarkSVGElem = (name, callback, controlParentElement) => {
  * @description Sends a message from the "popup.js" to "background.js" who will then send a message to "contentScript.js" to change the video element's "currentTime" to "bookmarkTime".
  * @param {Number} bookmarkTime 
  */
-const handlePlayVideo = async (bookmarkTime) => {
+export const handlePlayVideo = async (bookmarkTime) => {
     const activeTab = await getActiveTab();
 
     chrome.tabs.sendMessage(activeTab.id, {
@@ -169,7 +172,7 @@ const handlePlayVideo = async (bookmarkTime) => {
  * @description Delete a bookmark from the current video's "bookmarks" array. If the current video has no more bookmarks left after deleting this, then remove the video's key-value pair from the Chrome Storage.
  * @param {Number} bookmarkTime 
  */
-const handleDeleteBookmark = async (bookmarkTime) => {
+export const handleDeleteBookmark = async (bookmarkTime) => {
     const bookmarkElementToDelete = document.getElementById("bookmark-" + bookmarkTime);
     bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 

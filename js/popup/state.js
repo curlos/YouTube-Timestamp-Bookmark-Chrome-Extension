@@ -1,7 +1,7 @@
 /**
  * @description Global state for the "popup.js" file.
  */
-const state = {
+export const state = {
     currentVideoBookmarks: [], 
     currentVideoBookmarksWithDataUrlByTime: [],
     currentVideoId: null,

@@ -1,4 +1,7 @@
-console.log(state)
+import { state } from './state.js'
+import { renderSpinnerCurrentVideoBookmarks, setCapturedFramesAndRender } from './currentVideoBookmarks.js'
+import { renderLeftMenuButton, renderSidebarModalWithVideos } from './videosWithBookmarks.js';
+import { renderRightSettingsButton, renderSettingsModalContent } from './settings.js';
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.

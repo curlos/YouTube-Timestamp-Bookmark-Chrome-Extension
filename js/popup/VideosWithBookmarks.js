@@ -1,7 +1,10 @@
+import { state } from "./state.js";
+import { getAllVideosWithBookmarks, handleFilteredBookmarks } from './helpers.js'
+
 /**
  * @description Renders the left "menu" button that when clicked will open or close the "Videos With Bookmarks" sidebar modal.
  */
-const renderLeftMenuButton = () => {
+export const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu");
     menuDiv.addEventListener("click", () => {
@@ -33,7 +36,7 @@ const renderLeftMenuButton = () => {
 /**
  * @description Render a sidebar modal that shows a list of videos with their thumbnail image, title, and number of bookmarks.
  */
-const renderSidebarModalWithVideos = async () => {
+export const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector(".sidebar-video-list");
     sidebarVideoListElem.innerHTML = "";
 
@@ -103,7 +106,7 @@ const renderSidebarModalWithVideos = async () => {
 /**
  * @description Render the "Delete All Bookmarks" button at the bottom of the "Video With Bookmarks" sidebar modal view. When clicked, it will remove all videos and their bookmarks from the Chrome Storage.
  */
-const renderDeleteAllBookmarksButton = async () => {
+export const renderDeleteAllBookmarksButton = async () => {
     await getAllVideosWithBookmarks();
 
     if (!state.allVideosWithBookmarks || Object.keys(state.allVideosWithBookmarks).length === 0) {
