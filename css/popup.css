@@ -32,7 +32,8 @@ body {
     border-color: #66afe9;
 }
 
-#bookmarks, #settings {
+#bookmarks,
+#settings {
     padding: 8px;
     display: flex;
     flex-direction: column;
@@ -126,7 +127,8 @@ body {
     padding: 8px;
 }
 
-.sidebar-modal, .sidebar-modal-right {
+.sidebar-modal,
+.sidebar-modal-right {
     position: absolute; /* Ensures positioning within the popup */
     top: 0;
     left: -100%; /* Start hidden to the left */
@@ -141,7 +143,7 @@ body {
 }
 
 .sidebar-transition {
-    box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Adds shadow for depth when sliding in */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Adds shadow for depth when sliding in */
     transition: left 0.3s ease; /* Smoothes the transition of the sidebar */
 }
 
@@ -157,7 +159,8 @@ body {
     right: 0;
 }
 
-.sidebar-video-list, .sidebar-settings-list {
+.sidebar-video-list,
+.sidebar-settings-list {
     height: 550px;
     overflow: auto;
 }
@@ -198,19 +201,21 @@ body {
     scrollbar-color: #919191 transparent;
 }
 
-.bookmarks-outer-wrapper{
+.bookmarks-outer-wrapper {
     position: relative;
     width: 100%;
 }
 
-.delete-video-bookmarks-button-wrapper, .delete-all-bookmarks-button-wrapper {
+.delete-video-bookmarks-button-wrapper,
+.delete-all-bookmarks-button-wrapper {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
 }
 
-.delete-video-bookmarks-button, .delete-all-bookmarks-button {
+.delete-video-bookmarks-button,
+.delete-all-bookmarks-button {
     background-color: rgba(217, 77, 77, 0.25);
     color: red;
     padding: 8px;
@@ -218,8 +223,9 @@ body {
     cursor: pointer;
 }
 
-.delete-video-bookmarks-button:hover, .delete-all-bookmarks-button:hover {
-    background-color: rgba(217, 77, 77, 0.40);
+.delete-video-bookmarks-button:hover,
+.delete-all-bookmarks-button:hover {
+    background-color: rgba(217, 77, 77, 0.4);
 }
 .delete-all-bookmarks-button {
     margin-top: 12px;
@@ -236,15 +242,15 @@ svg {
     display: inline-block;
     width: 50px;
     height: 24px;
-  }
-  
-  .switch input { 
+}
+
+.switch input {
     opacity: 0;
     width: 0;
     height: 0;
-  }
-  
-  .slider {
+}
+
+.slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -252,11 +258,11 @@ svg {
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-  }
-  
-  .slider:before {
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+.slider:before {
     position: absolute;
     content: "";
     height: 17px;
@@ -264,40 +270,40 @@ svg {
     left: 4px;
     bottom: 4px;
     background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-  }
-  
-  input:checked + .slider {
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+input:checked + .slider {
     background-color: #1b5fce;
-  }
-  
-  input:focus + .slider {
+}
+
+input:focus + .slider {
     box-shadow: 0 0 1px #1b5fce;
-  }
-  
-  input:checked + .slider:before {
+}
+
+input:checked + .slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
-  }
-  
-  /* Rounded sliders */
-  .slider.round {
+}
+
+/* Rounded sliders */
+.slider.round {
     border-radius: 34px;
-  }
-  
-  .slider.round:before {
+}
+
+.slider.round:before {
     border-radius: 50%;
-  }
+}
 
-  .sidebar-settings-list {
+.sidebar-settings-list {
     padding: 8px;
-  }
+}
 
-  .settings-capture-frame {
+.settings-capture-frame {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 16px;
-  }
+}

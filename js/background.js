@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             chrome.action.openPopup();
             break;
         case "get-active-tab":
-            getActiveTab(sendResponse)
+            getActiveTab(sendResponse);
         case "background-get-current-video-bookmarks-with-frames":
             getCurrentVideoBookmarksWithFrames(sendResponse);
             return true;
@@ -18,22 +18,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
-    const isYouTubeFullVideo = tab.url && tab.url.includes("youtube.com/watch")
-    const isYouTubeShortsVideo = tab.url && tab.url.includes("youtube.com/shorts")
-    const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo
+    const isYouTubeFullVideo = tab.url && tab.url.includes("youtube.com/watch");
+    const isYouTubeShortsVideo = tab.url && tab.url.includes("youtube.com/shorts");
+    const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo;
 
     if (isYouTubeVideo && readyTabs.has(tabId)) {
         const queryParameters = tab.url.split("?")[1];
         const urlParameters = new URLSearchParams(queryParameters);
         const videoId = isYouTubeFullVideo ? urlParameters.get("v") : getYouTubeShortsVideoId(tab.url);
 
-        currentVideoBookmarksWithFrames = null
+        currentVideoBookmarksWithFrames = null;
 
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
             videoId,
-            videoType: isYouTubeFullVideo ? 'watch' : 'shorts',
-            activeTab: tab
+            videoType: isYouTubeFullVideo ? "watch" : "shorts",
+            activeTab: tab,
         });
     }
 });
@@ -43,16 +43,21 @@ const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
     const activeTab = await getActiveTab();
     const tabId = activeTab.id;
 
-    chrome.tabs.sendMessage(tabId, { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames }, {}, (response) => {
-        currentVideoBookmarksWithFrames = response;
+    chrome.tabs.sendMessage(
+        tabId,
+        { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames },
+        {},
+        (response) => {
+            currentVideoBookmarksWithFrames = response;
 
-        if (chrome.runtime.lastError) {
-            // Handle any errors that might occur
-            console.error("Error sending message to tab:", chrome.runtime.lastError.message);
-        } else {
-            sendResponse(response);
-        }
-    });
+            if (chrome.runtime.lastError) {
+                // Handle any errors that might occur
+                console.error("Error sending message to tab:", chrome.runtime.lastError.message);
+            } else {
+                sendResponse(response);
+            }
+        },
+    );
 };
 
 async function getActiveTab(sendResponse) {
@@ -62,7 +67,7 @@ async function getActiveTab(sendResponse) {
     });
 
     if (sendResponse) {
-        sendResponse(tabs[0])
+        sendResponse(tabs[0]);
     }
 
     return tabs[0];
@@ -71,6 +76,5 @@ async function getActiveTab(sendResponse) {
 const getYouTubeShortsVideoId = (url) => {
     const match = url.match(/\/shorts\/([^/?]+)/);
     const shortsId = match ? match[1] : null; // Exclude query params
-    return shortsId
-}
-
+    return shortsId;
+};

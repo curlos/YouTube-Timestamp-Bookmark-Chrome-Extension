@@ -14,11 +14,11 @@ let youtubeRightControls = null;
 let videoElem = null;
 let currentVideoId = "";
 // "currentVideoType" can either be "watch" or "shorts".
-let currentVideoType = ""
-let currentVideoBookmarks = []
-let currentVideoFullObj = null
-let activeTab = null
-let userSettings = null
+let currentVideoType = "";
+let currentVideoBookmarks = [];
+let currentVideoFullObj = null;
+let activeTab = null;
+let userSettings = null;
 
 /**
  * @description Fetch the array of bookmarks for the current video. If no bookmarks, will return an empty array.
@@ -27,7 +27,7 @@ let userSettings = null
 const fetchBookmarks = async () => {
     const obj = await chrome.storage.sync.get(currentVideoId);
     currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
-    currentVideoFullObj = obj[currentVideoId]
+    currentVideoFullObj = obj[currentVideoId];
 };
 
 /**
@@ -35,7 +35,7 @@ const fetchBookmarks = async () => {
  */
 const handleAddNewBookmark = async () => {
     const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
-    bookmarkButton.disabled = true
+    bookmarkButton.disabled = true;
 
     const currentTime = videoElem.currentTime;
     const newBookmark = {
@@ -43,18 +43,18 @@ const handleAddNewBookmark = async () => {
     };
 
     await fetchBookmarks();
-    const newCurrentVideoBookmarks = [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)
+    const newCurrentVideoBookmarks = [...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time);
 
-    const title = currentVideoFullObj && currentVideoFullObj.title || activeTab.title
-    const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || getThumbnailUrl()
-    const videoType = currentVideoType
+    const title = (currentVideoFullObj && currentVideoFullObj.title) || activeTab.title;
+    const thumbnailImageSrc = (currentVideoFullObj && currentVideoFullObj.thumbnailImageSrc) || getThumbnailUrl();
+    const videoType = currentVideoType;
 
     const newCurrentVideoBookmarksStr = JSON.stringify({
         bookmarks: newCurrentVideoBookmarks,
         title,
         thumbnailImageSrc,
         videoType,
-        updatedAt: new Date()
+        updatedAt: new Date(),
     });
 
     await chrome.storage.sync.set({
@@ -62,33 +62,33 @@ const handleAddNewBookmark = async () => {
     });
 
     // Get the updated bookmarks with the newly added one.
-    await fetchBookmarks()
+    await fetchBookmarks();
 
     await chrome.runtime.sendMessage({ type: "open-popup" });
 };
 
 const getThumbnailUrl = () => {
-    if (currentVideoType === 'watch') {
-        const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+    if (currentVideoType === "watch") {
+        const scriptJsonElemList = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
 
         for (let scriptJsonElem of scriptJsonElemList) {
             if (scriptJsonElem.textContent) {
-                const scriptJsonObj = JSON.parse(scriptJsonElem.textContent)
-                const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {}
-                
+                const scriptJsonObj = JSON.parse(scriptJsonElem.textContent);
+                const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {};
+
                 if (thumbnailUrlArray) {
-                    return thumbnailUrlArray[0]
+                    return thumbnailUrlArray[0];
                 }
             }
         }
     }
 
-    if (currentVideoType === 'shorts') {
-        return `https://i.ytimg.com/vi/${currentVideoId}/frame0.jpg`
+    if (currentVideoType === "shorts") {
+        return `https://i.ytimg.com/vi/${currentVideoId}/frame0.jpg`;
     }
 
-    return ''
-}
+    return "";
+};
 
 /**
  * @description When a new video is loaded, get that video's bookmarks and add the bookmark button to the video player's left controls if it hasn't been added yet.
@@ -102,52 +102,52 @@ const newVideoLoaded = async () => {
             videoElem = document.getElementsByClassName("video-stream")[0];
         }
 
-        if (!bookmarkBtnExists || currentVideoType === 'shorts') {
+        if (!bookmarkBtnExists || currentVideoType === "shorts") {
             switch (currentVideoType) {
-                case 'watch':
-                    const bookmarkBtnElement = createAndGetBookmarkBtnElement()
+                case "watch":
+                    const bookmarkBtnElement = createAndGetBookmarkBtnElement();
                     youtubeRightControls = document.getElementsByClassName("ytp-right-controls")[0];
                     youtubeRightControls.insertBefore(bookmarkBtnElement, youtubeRightControls.firstChild);
                     break;
-                case 'shorts':
-                    const actionsElemList = Array.from(document.querySelectorAll('#actions'))
+                case "shorts":
+                    const actionsElemList = Array.from(document.querySelectorAll("#actions"));
 
                     actionsElemList.forEach((actionsElem) => {
-                        const hasBookmarkBtn = actionsElem.querySelector('.bookmark-btn')
-            
+                        const hasBookmarkBtn = actionsElem.querySelector(".bookmark-btn");
+
                         if (!hasBookmarkBtn) {
                             // A new bookmark element has to be created for each "actions" container.
-                            const bookmarkBtnElement = createAndGetBookmarkBtnElement()
+                            const bookmarkBtnElement = createAndGetBookmarkBtnElement();
                             actionsElem.insertBefore(bookmarkBtnElement, actionsElem.firstChild);
                         }
-                    })
+                    });
             }
         }
     }
 };
 
 const createAndGetBookmarkBtnElement = () => {
-    const bookmarkSvgContainer = document.createElement('button')
+    const bookmarkSvgContainer = document.createElement("button");
 
     bookmarkSvgContainer.className = "ytp-button bookmark-btn";
     bookmarkSvgContainer.title = "Click to bookmark current timestamp";
     bookmarkSvgContainer.addEventListener("click", handleAddNewBookmark);
-    bookmarkSvgContainer.innerHTML = getIconSVG('bookmark')
+    bookmarkSvgContainer.innerHTML = getIconSVG("bookmark");
 
-    return bookmarkSvgContainer
-}
+    return bookmarkSvgContainer;
+};
 
 chrome.runtime.onMessage.addListener(async (obj) => {
     const { type, value, videoId, videoType, activeTab: backgroundActiveTab } = obj;
 
     if (backgroundActiveTab) {
-        activeTab = backgroundActiveTab
+        activeTab = backgroundActiveTab;
     }
 
     switch (type) {
         case "tab-updated-new-video":
             // Reset the global videos each time we land on a new video to prevent potential overlap of global variables.
-            resetGlobalVariables()
+            resetGlobalVariables();
             currentVideoId = videoId;
             currentVideoType = videoType;
             newVideoLoaded();
@@ -169,42 +169,46 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
             break;
         case "content-get-current-video-bookmarks-with-frames":
-            await fetchUserSettings()
+            await fetchUserSettings();
 
             if (!userSettings.captureFrames) {
-                return currentVideoBookmarks
+                return currentVideoBookmarks;
             }
 
-            const { currentVideoBookmarksWithFrames } = obj
-            await fetchBookmarks()
+            const { currentVideoBookmarksWithFrames } = obj;
+            await fetchBookmarks();
 
             if (!videoElem) {
                 videoElem = document.getElementsByClassName("video-stream")[0];
             }
 
-            const timestampBeforeCapturing = videoElem.currentTime
+            const timestampBeforeCapturing = videoElem.currentTime;
 
             const newCurrentVideoBookmarksWithFrames = [];
 
-            const currentVideoBookmarksWithFramesByTime = currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
+            const currentVideoBookmarksWithFramesByTime =
+                currentVideoBookmarksWithFrames && arrayToObjectByKey(currentVideoBookmarksWithFrames, "time");
 
-            let capturedAtLeastOneFrame = false
+            let capturedAtLeastOneFrame = false;
 
             for (let i = 0; i < currentVideoBookmarks.length; i++) {
                 const bookmark = currentVideoBookmarks[i];
 
-                const alreadyHasFrame = currentVideoBookmarksWithFramesByTime && currentVideoBookmarksWithFramesByTime[bookmark.time] && currentVideoBookmarksWithFramesByTime[bookmark.time].dataUrl
+                const alreadyHasFrame =
+                    currentVideoBookmarksWithFramesByTime &&
+                    currentVideoBookmarksWithFramesByTime[bookmark.time] &&
+                    currentVideoBookmarksWithFramesByTime[bookmark.time].dataUrl;
 
                 // If we already have the captured frame for the bookmark at that time, then use the cached frame.
                 if (alreadyHasFrame) {
-                    const bookmarkWithFrame = currentVideoBookmarksWithFramesByTime[bookmark.time]
-                    newCurrentVideoBookmarksWithFrames.push(bookmarkWithFrame)
-                    continue
+                    const bookmarkWithFrame = currentVideoBookmarksWithFramesByTime[bookmark.time];
+                    newCurrentVideoBookmarksWithFrames.push(bookmarkWithFrame);
+                    continue;
                 }
 
                 const dataUrl = await captureFrameAtTimestamp(videoElem, bookmark.time);
 
-                capturedAtLeastOneFrame = true
+                capturedAtLeastOneFrame = true;
 
                 newCurrentVideoBookmarksWithFrames.push({
                     ...bookmark,
@@ -214,31 +218,31 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
             if (capturedAtLeastOneFrame) {
                 // Because capturing a frame requires that we go to the actual time in the video, reset the time back to the timestamp that the user was on before starting to capture the bookmarked frames.
-                videoElem.currentTime = timestampBeforeCapturing
+                videoElem.currentTime = timestampBeforeCapturing;
             }
 
             const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
-            bookmarkButton.disabled = false
+            bookmarkButton.disabled = false;
 
             return newCurrentVideoBookmarksWithFrames;
     }
 });
 
 const fetchUserSettings = async () => {
-    const obj = await chrome.storage.sync.get('userSettings');
-    const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj['userSettings']) : {}
-    userSettings = chromeStorageUserSettingsJsonObj
-}
+    const obj = await chrome.storage.sync.get("userSettings");
+    const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj["userSettings"]) : {};
+    userSettings = chromeStorageUserSettingsJsonObj;
+};
 
 const resetGlobalVariables = () => {
     youtubeRightControls = null;
     videoElem = null;
     currentVideoId = "";
     currentVideoType = "";
-    currentVideoBookmarks = []
-    currentVideoFullObj = null
-    userSettings = null
-}
+    currentVideoBookmarks = [];
+    currentVideoFullObj = null;
+    userSettings = null;
+};
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
 newVideoLoaded();
