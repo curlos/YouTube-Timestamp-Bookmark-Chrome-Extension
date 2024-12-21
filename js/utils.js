@@ -40,7 +40,7 @@ const formatTime = (seconds) => {
 };
 
 /**
- * @description
+ * @description Capture the visual frame of a video by taking the video element at the current time, drawing it on an HTML Canvas, and then converting that into a Data URL for that timestamp that can be used as an image's URL to display the image of the frame from that timestamp.
  * @param {HTMLVideoElement} videoElement 
  * @param {Number} timestamp 
  * @returns {String} A "Data URL" string. For example, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...". The main thing to know is that these strings are HUGE compared to a normal string so they won't fit in Chrome's Storage.
@@ -50,18 +50,15 @@ const captureFrameAtTimestamp = async (videoElement, timestamp) => {
         throw new Error("Video element not provided");
     }
 
-    
-
     return new Promise((resolve, reject) => {
-        // Error handling if the videoElement cannot be played
         if (videoElement.readyState < 2) {
             reject("Video is not ready for playback");
             return;
         }
 
-        // Function to perform the capture
         const onSeeked = () => {
             try {
+                // Create a canvas, draw the videoElement at that specific timestamp, and convert it to a dataUrl.
                 const canvas = document.createElement("canvas");
                 canvas.width = videoElement.videoWidth;
                 canvas.height = videoElement.videoHeight;
@@ -85,6 +82,14 @@ const captureFrameAtTimestamp = async (videoElement, timestamp) => {
     });
 };
 
+/**
+ * @description Get an SVG Icon from a list of FontAwesome SVGs.
+ * @param {String} name 
+ * @param {String} color 
+ * @param {String} width 
+ * @param {String} height 
+ * @returns {String}
+ */
 const getIconSVG = (name, color = "white", width = "16px", height = "16px") => {
     const getIconSVGPath = () => {
         switch (name) {
@@ -107,11 +112,15 @@ const getIconSVG = (name, color = "white", width = "16px", height = "16px") => {
         </svg>`;
 };
 
+/**
+ * @description Using a "keyProperty", go through an array of objects and create a new object with the keys being the value of the "keyProperty" for each object.
+ * @param {Array} array 
+ * @param {any} keyProperty 
+ * @returns 
+ */
 const arrayToObjectByKey = (array, keyProperty) => {
     return array.reduce((acc, obj) => {
-        // Use the value of the specified property as the key
         const key = keyProperty ? obj[keyProperty] : obj;
-        // Assign the entire object as the value for this key
         acc[key] = obj;
         return acc;
     }, {});
