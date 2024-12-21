@@ -18,6 +18,7 @@ let currentVideoType = ""
 let currentVideoBookmarks = []
 let currentVideoFullObj = null
 let activeTab = null
+let userSettings = null
 
 /**
  * @description Fetch the array of bookmarks for the current video. If no bookmarks, will return an empty array.
@@ -168,6 +169,12 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 
             break;
         case "content-get-current-video-bookmarks-with-frames":
+            await fetchUserSettings()
+
+            if (!userSettings.captureFrames) {
+                return currentVideoBookmarks
+            }
+
             const { currentVideoBookmarksWithFrames } = obj
             await fetchBookmarks()
 
@@ -217,6 +224,12 @@ chrome.runtime.onMessage.addListener(async (obj) => {
     }
 });
 
+const fetchUserSettings = async () => {
+    const obj = await chrome.storage.sync.get('userSettings');
+    const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj['userSettings']) : {}
+    userSettings = chromeStorageUserSettingsJsonObj
+}
+
 const resetGlobalVariables = () => {
     youtubeRightControls = null;
     videoElem = null;
@@ -224,6 +237,7 @@ const resetGlobalVariables = () => {
     currentVideoType = "";
     currentVideoBookmarks = []
     currentVideoFullObj = null
+    userSettings = null
 }
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.

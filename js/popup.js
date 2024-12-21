@@ -24,21 +24,12 @@ document.onreadystatechange = async () => {
 
         if (currentVideoId) {
             renderSpinner()
-
             renderLeftMenuButton()
             renderRightSettingsButton()
             renderSidebarModalWithVideos()
             renderSettingsModalContent()
-            
 
-            chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarksWithFrames) => {
-                currentVideoBookmarks = currentVideoBookmarksWithFrames
-
-                currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
-
-                await renderElemBookmarks();
-                renderDeleteVideoBookmarksButton()
-            });
+            setCapturedFramesAndRender()
         } else {
             renderLeftMenuButton()
             renderRightSettingsButton()
@@ -50,6 +41,20 @@ document.onreadystatechange = async () => {
         }
     }
 };
+
+/**
+ * @description Send the message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
+ */
+const setCapturedFramesAndRender = () => {
+    chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarksWithFrames) => {
+        currentVideoBookmarks = currentVideoBookmarksWithFrames
+
+        currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, 'time')
+
+        await renderElemBookmarks();
+        renderDeleteVideoBookmarksButton()
+    });
+}
 
 const renderDeleteVideoBookmarksButton = () => {
     if (currentVideoBookmarks.length === 0) {
@@ -248,7 +253,14 @@ const renderSettingsModalContent = async () => {
         });
 
         await fetchUserSettings()
-        await renderElemBookmarks()
+
+        if (isChecked) {
+            // If "Capture Frames" is checked, then show the loading spinner and send the message to content script to capture frames at the specified timestamps.
+            renderSpinner()
+            setCapturedFramesAndRender()
+        } else {
+            await renderElemBookmarks()
+        }
     })
 }
 
