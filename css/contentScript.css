@@ -1,4 +1,10 @@
 .bookmark-btn {
     display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.ytp-right-controls {
+    display: flex !important;
     align-items: center !important;
 }

@@ -10,7 +10,7 @@ onMessage.addListener = (fn) =>
 
 chrome.runtime.sendMessage({ type: "ready" });
 
-let youtubeLeftControls = null;
+let youtubeRightControls = null;
 let videoElem = null;
 let currentVideoId = "";
 // "currentVideoType" can either be "watch" or "shorts".
@@ -105,8 +105,8 @@ const newVideoLoaded = async () => {
             switch (currentVideoType) {
                 case 'watch':
                     const bookmarkBtnElement = createAndGetBookmarkBtnElement()
-                    youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-                    youtubeLeftControls.appendChild(bookmarkBtnElement);
+                    youtubeRightControls = document.getElementsByClassName("ytp-right-controls")[0];
+                    youtubeRightControls.insertBefore(bookmarkBtnElement, youtubeRightControls.firstChild);
                     break;
                 case 'shorts':
                     const actionsElemList = Array.from(document.querySelectorAll('#actions'))
@@ -218,7 +218,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 });
 
 const resetGlobalVariables = () => {
-    youtubeLeftControls = null;
+    youtubeRightControls = null;
     videoElem = null;
     currentVideoId = "";
     currentVideoType = "";
