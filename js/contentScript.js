@@ -207,14 +207,18 @@ chrome.runtime.onMessage.addListener(async (obj) => {
                     continue;
                 }
 
-                const dataUrl = await captureFrameAtTimestamp(videoElem, bookmark.time);
+                try {
+                    const dataUrl = await captureFrameAtTimestamp(videoElem, bookmark.time);
 
-                capturedAtLeastOneFrame = true;
+                    capturedAtLeastOneFrame = true;
 
-                newCurrentVideoBookmarksWithFrames.push({
-                    ...bookmark,
-                    dataUrl,
-                });
+                    newCurrentVideoBookmarksWithFrames.push({
+                        ...bookmark,
+                        dataUrl,
+                    });
+                } catch (error) {
+                    console.error(error)
+                }
             }
 
             if (capturedAtLeastOneFrame) {

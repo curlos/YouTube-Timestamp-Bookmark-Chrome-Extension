@@ -16,6 +16,11 @@ async function getActiveTab(sendResponse) {
     return tabs[0];
 }
 
+/**
+ * @description Formats a number of seconds into a timestamp string formatted like HH:MM:SS. For example, 300 seconds would be "05:00". 3600 seconds (1 hour) would be 01:00:00.
+ * @param {Number} seconds 
+ * @returns {String}
+ */
 const formatTime = (seconds) => {
     // Calculate hours, minutes, and remaining seconds
     const hours = Math.floor(seconds / 3600);
@@ -34,14 +39,22 @@ const formatTime = (seconds) => {
     }
 };
 
-const captureFrameAtTimestamp = async (video, timestamp) => {
-    if (!video) {
+/**
+ * @description
+ * @param {HTMLVideoElement} videoElement 
+ * @param {Number} timestamp 
+ * @returns {String} A "Data URL" string. For example, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...". The main thing to know is that these strings are HUGE compared to a normal string so they won't fit in Chrome's Storage.
+ */
+const captureFrameAtTimestamp = async (videoElement, timestamp) => {
+    if (!videoElement) {
         throw new Error("Video element not provided");
     }
 
+    
+
     return new Promise((resolve, reject) => {
-        // Error handling if the video cannot be played
-        if (video.readyState < 2) {
+        // Error handling if the videoElement cannot be played
+        if (videoElement.readyState < 2) {
             reject("Video is not ready for playback");
             return;
         }
@@ -50,25 +63,25 @@ const captureFrameAtTimestamp = async (video, timestamp) => {
         const onSeeked = () => {
             try {
                 const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
                 const ctx = canvas.getContext("2d");
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                 const dataUrl = canvas.toDataURL("image/png");
 
                 resolve(dataUrl);
             } catch (error) {
                 reject("Failed to capture frame: " + error.message);
             } finally {
-                video.removeEventListener("seeked", onSeeked);
+                videoElement.removeEventListener("seeked", onSeeked);
             }
         };
 
         // Add the listener before setting currentTime to avoid any race condition
-        video.addEventListener("seeked", onSeeked, { once: true });
+        videoElement.addEventListener("seeked", onSeeked, { once: true });
 
         // Set currentTime after adding listener
-        video.currentTime = timestamp;
+        videoElement.currentTime = timestamp;
     });
 };
 

@@ -6,6 +6,7 @@
 // Global Variables
 let readyTabs = new Set();
 let currentVideoBookmarksWithFrames = null;
+let activeTabIsReadyAndUpdated = false
 
 /**
  * @description Listen for messages from contentScript.js and popup.js
@@ -18,8 +19,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case "open-popup":
             chrome.action.openPopup();
             break;
-        case "get-active-tab":
-            getActiveTab(sendResponse);
         case "background-get-current-video-bookmarks-with-frames":
             getCurrentVideoBookmarksWithFrames(sendResponse);
             return true;
@@ -41,11 +40,15 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
 
         currentVideoBookmarksWithFrames = null;
 
+        activeTabIsReadyAndUpdated = false
+        
         chrome.tabs.sendMessage(tabId, {
             type: "tab-updated-new-video",
             videoId,
             videoType: isYouTubeFullVideo ? "watch" : "shorts",
             activeTab: tab,
+        }, {}, () => {
+            activeTabIsReadyAndUpdated = true
         });
     }
 });
@@ -57,6 +60,9 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
 const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
     const activeTab = await getActiveTab();
     const tabId = activeTab.id;
+
+    // Wait for the tab to be ready
+    await waitForTabToBeReady();
 
     chrome.tabs.sendMessage(
         tabId,
@@ -102,3 +108,28 @@ const getYouTubeShortsVideoId = (url) => {
     const shortsId = match ? match[1] : null; // Exclude query params
     return shortsId;
 };
+
+/**
+ * @description Wait for the specified tab to be ready
+ * @param {number} tabId - The ID of the tab to wait for.
+ * @returns {Promise} Resolves when the tab is ready.
+ */
+function waitForTabToBeReady(tabId) {
+    return new Promise((resolve, reject) => {
+        const checkInterval = 100; // Check every 100ms
+        const timeout = 20000; // Wait up to 20 seconds
+
+        let elapsedTime = 0;
+
+        const interval = setInterval(() => {
+            if (activeTabIsReadyAndUpdated) {
+                clearInterval(interval);
+                resolve();
+            } else if (elapsedTime >= timeout) {
+                clearInterval(interval);
+                reject(new Error("Tab is not ready within the timeout period"));
+            }
+            elapsedTime += checkInterval;
+        }, checkInterval);
+    });
+}

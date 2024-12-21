@@ -181,7 +181,7 @@ const renderSidebarModalWithVideos = async () => {
         const dateB = new Date(objB.updatedAt);
 
         return dateB - dateA;
-    });
+    }).filter((videoId) => videoId !== 'userSettings');
 
     sortedVideosWithBookmarksIds.forEach((videoId) => {
         const video = JSON.parse(allVideosWithBookmarks[videoId]);
@@ -414,6 +414,7 @@ const getAllVideosWithBookmarks = () => {
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get(null, function (items) {
             if (chrome.runtime.lastError) {
+                console.log('Chrome run time error!!!!')
                 reject(chrome.runtime.lastError);
             } else {
                 allVideosWithBookmarks = items;
