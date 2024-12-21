@@ -3,6 +3,7 @@ let currentVideoBookmarksWithDataUrlByTime = []
 let currentVideoId = null
 let allVideosWithBookmarks = null
 let currentVideoFullObj = null
+let userSettings = null
 
 /**
  * @description Once the DOM Content has loaded, check if we're on a YouTube video page and if we are, get all the bookmarks for that video and show them.
@@ -27,6 +28,7 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderRightSettingsButton()
             renderSidebarModalWithVideos()
+            renderSettingsModalContent()
             
 
             chrome.runtime.sendMessage({ type: "background-get-current-video-bookmarks-with-frames" }, async (currentVideoBookmarksWithFrames) => {
@@ -41,6 +43,7 @@ document.onreadystatechange = async () => {
             renderLeftMenuButton()
             renderRightSettingsButton()
             renderSidebarModalWithVideos()
+            renderSettingsModalContent()
 
             document.querySelector('.sidebar-modal').classList.add('sidebar-shown');
             document.querySelector('.title').textContent = 'Videos With Bookmarks'
@@ -217,11 +220,36 @@ const renderSidebarModalWithVideos = async () => {
 }
 
 const renderSettingsModalContent = async () => {
-    const sidebarVideoListElem = document.querySelector('.sidebar-settings-list')
-    sidebarVideoListElem.innerHTML = ''
+    await fetchUserSettings()
 
-    // Get the settings from chrome storage
-    
+    // if there are no user settings, set the default settings.
+    if (!userSettings) {
+        const defaultUserSettings = {
+            'captureFrames': true
+        }
+
+        await chrome.storage.sync.set({
+            'userSettings': JSON.stringify(defaultUserSettings),
+        });
+
+        await fetchUserSettings()
+    }
+
+    const captureFramesCheckbox = document.getElementById('capture-frames-checkbox')
+    captureFramesCheckbox.checked = userSettings.captureFrames ? true : false
+
+    captureFramesCheckbox.addEventListener('click', async (e) => {
+        const isChecked = e.target.checked
+
+        await chrome.storage.sync.set({
+            'userSettings': JSON.stringify({
+                'captureFrames': isChecked
+            }),
+        });
+
+        await fetchUserSettings()
+        await renderElemBookmarks()
+    })
 }
 
 const renderSpinner = () => {
@@ -385,3 +413,9 @@ const fetchBookmarks = async () => {
     currentVideoBookmarks = bookmarks
     currentVideoFullObj = jsonObj
 };
+
+const fetchUserSettings = async () => {
+    const obj = await chrome.storage.sync.get('userSettings');
+    const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj['userSettings']) : {}
+    userSettings = chromeStorageUserSettingsJsonObj
+}
