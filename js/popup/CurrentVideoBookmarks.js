@@ -114,6 +114,15 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
         },
         controlsElement,
     );
+
+    setControlBookmarkSVGElem(
+        "pen-to-square",
+        () => {
+            handlePlayVideo(bookmark.time);
+        },
+        controlsElement,
+    );
+
     setControlBookmarkSVGElem(
         "delete",
         () => {
@@ -126,19 +135,65 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     newBookmarkElement.className = "bookmark-container";
     newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper";
 
-    if (isLastIndex) {
-        newBookmarkBottomWrapperElement.classList.add("bookmark-no-bottom-border");
-    }
-
     showCapturedFrames && newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
     newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement);
     newBookmarkBottomWrapperElement.appendChild(controlsElement);
 
+    if (isLastIndex) {
+        newBookmarkElement.classList.add("bookmark-no-bottom-border");
+    }
+
+    const noteElement = document.createElement('div')
+    noteElement.textContent = 'Paulie about to shoot Mikey witih a crazed look on his face'
+
+    const formElement = document.createElement('form')
+    const textareaElement = document.createElement('textarea')
+
+    textareaElement.addEventListener("input", function () {
+        this.style.height = "auto"; // Reset the height
+        this.style.height = `${this.scrollHeight}px`; // Set it to the scroll height
+    });
+
+    const submitButton = document.createElement('button')
+    submitButton.textContent = 'Submit'
+    submitButton.className = 'submit-button'
+    submitButton.type = 'submit'
+    
+    formElement.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        console.log('Submitting something!')
+    })
+
+    const cancelButton = document.createElement('button')
+    cancelButton.textContent = 'Cancel'
+    cancelButton.className = 'cancel-button'
+    cancelButton.addEventListener('click', (e) => {
+        e.preventDefault()
+
+        // Remove the textarea
+    })
+
+    const buttonsWrapper = document.createElement('div')
+    buttonsWrapper.className = 'form-buttons-wrapper'
+    buttonsWrapper.appendChild(cancelButton)
+    buttonsWrapper.appendChild(submitButton)
+
+    formElement.appendChild(textareaElement)
+    formElement.appendChild(buttonsWrapper)
+
     showCapturedFrames && newBookmarkElement.appendChild(timestampImgElement);
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
+    newBookmarkElement.appendChild(noteElement);
+    newBookmarkElement.appendChild(formElement)
 
     bookmarkListElem.appendChild(newBookmarkElement);
 };
+
+function resizeTextarea(ev) {
+    this.style.height = '24px';
+    this.style.height = this.scrollHeight + 12 + 'px';
+}
 
 /**
  * @description Create a new element with an SVG icon and a callback that runs when the element is clicked.

@@ -8,6 +8,7 @@ body {
     margin: 0;
     padding: 0;
     user-select: none;
+    font-size: 14px;
 }
 
 .container {
@@ -44,17 +45,32 @@ body {
 
 .bookmark-container {
     width: 100%;
+    border-bottom: 1px solid #919191;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.bookmark-container textarea {
+    background: transparent;
+    resize: none;
+    outline: none;
+    border: none;
+    background-color: #636363;
+    color: white;
+    margin-top: 10px;
+    padding: 5px;
+    width: 100%;
+    font-family: sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    height: 70px;
 }
 
 .bookmark-bottom-wrapper {
     display: flex;
     align-items: center;
-    border-bottom-color: #919191;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
     padding-top: 10px;
     padding-bottom: 10px;
-    margin-bottom: 10px;
 }
 
 .bookmark-no-bottom-border {
@@ -344,4 +360,36 @@ input:checked + .slider:before {
     flex-direction: column;
     gap: 5px;
     font-size: 16px;
+}
+
+.form-buttons-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-buttons-wrapper button {
+    width: 100%;
+    border-radius: 5px;
+    padding: 7px;
+    outline: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.form-buttons-wrapper button.submit-button {
+    background-color: #1b5fce;
+}
+.form-buttons-wrapper button.submit-button:hover {
+    background-color: #2570e9;
+}
+
+.form-buttons-wrapper button.cancel-button {
+    background-color: #a0a0a0;
+}
+
+.form-buttons-wrapper button.cancel-button:hover {
+    background-color: #BBBBBB;
 }
