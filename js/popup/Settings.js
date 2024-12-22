@@ -96,8 +96,6 @@ const renderSortByOptions = async () => {
     const sortByOptionsElem = document.querySelector('.sort-by-options')
     sortByOptionsElem.innerHTML = ''
 
-    console.log(state.userSettings)
-
     if (!state.userSettings.sortBy) {
         state.userSettings.sortBy = SORT_BY_OPTION_LIST[0]
 

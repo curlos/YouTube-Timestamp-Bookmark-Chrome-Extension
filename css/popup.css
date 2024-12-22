@@ -17,7 +17,7 @@ body {
 }
 
 .title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -39,7 +39,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 550px;
+    height: 530px;
     overflow: auto;
 }
 
@@ -185,7 +185,7 @@ body {
 
 .sidebar-video-list,
 .sidebar-settings-list {
-    height: 550px;
+    height: 530px;
     overflow: auto;
 }
 
