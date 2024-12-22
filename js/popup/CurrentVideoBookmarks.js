@@ -177,6 +177,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
     cancelButton.className = 'cancel-button'
     cancelButton.addEventListener('click', (e) => {
         e.preventDefault()
+        toggleEditNoteForm()
     })
 
     const buttonsWrapper = document.createElement('div')

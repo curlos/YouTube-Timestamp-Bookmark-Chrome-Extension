@@ -233,9 +233,10 @@ body {
 .delete-video-bookmarks-button-wrapper,
 .delete-all-bookmarks-button-wrapper {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-end;
     width: 100%;
+    flex: 1;
 }
 
 .delete-video-bookmarks-button,
