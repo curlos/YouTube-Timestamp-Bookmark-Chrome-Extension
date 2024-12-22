@@ -42,6 +42,7 @@ const handleAddNewBookmark = async () => {
     const currentTime = videoElem.currentTime;
     const newBookmark = {
         time: currentTime,
+        note: ''
     };
 
     await fetchBookmarks();

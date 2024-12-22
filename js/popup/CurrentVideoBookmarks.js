@@ -68,10 +68,12 @@ export const renderBookmarkElementsForCurrentVideo = async () => {
 
     for (let i = 0; i < state.currentVideoBookmarks.length; i++) {
         const { time } = state.currentVideoBookmarks[i];
-        const bookmark = state.currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
+        const bookmark = state.currentVideoBookmarks[i]
+        const bookmarkWithDataUrl = state.currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
+        const dataUrl = bookmarkWithDataUrl && bookmarkWithDataUrl.dataUrl
         const isLastIndex = i === state.currentVideoBookmarks.length - 1;
 
-        await addNewBookmarkElem(bookmarkListElem, bookmark, isLastIndex);
+        await addNewBookmarkElem(bookmarkListElem, bookmark, dataUrl, isLastIndex);
     }
 
     renderDeleteVideoBookmarksButton()
@@ -83,7 +85,7 @@ export const renderBookmarkElementsForCurrentVideo = async () => {
  * @param {Object} bookmark 
  * @param {Boolean} isLastIndex 
  */
-export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex) => {
+export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, isLastIndex) => {
     const showCapturedFrames = state.userSettings.captureFrames;
 
     const bookmarkTitleElement = document.createElement("div");
@@ -95,6 +97,11 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     const textareaElement = document.createElement('textarea')
     const noteElement = document.createElement('div')
 
+    const toggleEditNoteForm = () => {
+        formElement.classList.toggle('show-edit-form')
+        noteElement.classList.toggle('hide-note')
+    }
+
     bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
     bookmarkTitleElement.className = "bookmark-title";
     bookmarkTitleElement.addEventListener("click", () => {
@@ -103,7 +110,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
 
     controlsElement.className = "bookmark-controls";
 
-    showCapturedFrames && (timestampImgElement.src = bookmark.dataUrl);
+    showCapturedFrames && (timestampImgElement.src = dataUrl);
     showCapturedFrames && (timestampImgElement.className = "timestamp-img");
     showCapturedFrames &&
         timestampImgElement.addEventListener("click", () => {
@@ -121,7 +128,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     setControlBookmarkSVGElem(
         "pen-to-square",
         () => {
-            formElement.classList.toggle('show-edit-form')
+            toggleEditNoteForm()
         },
         controlsElement,
     );
@@ -146,7 +153,8 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
         newBookmarkElement.classList.add("bookmark-no-bottom-border");
     }
 
-    noteElement.textContent = 'Paulie about to shoot Mikey witih a crazed look on his face'
+    noteElement.textContent = bookmark.note || ''
+    textareaElement.textContent = bookmark.note || ''
 
     textareaElement.addEventListener("input", function () {
         this.style.height = "auto"; // Reset the height
@@ -158,10 +166,10 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     submitButton.className = 'submit-button'
     submitButton.type = 'submit'
     
-    formElement.addEventListener('submit', (e) => {
+    formElement.addEventListener('submit', async (e) => {
         e.preventDefault()
-
-        console.log('Submitting something!')
+        const newNote = textareaElement.value
+        await handleEditBookmarkNote(bookmark, newNote)
     })
 
     const cancelButton = document.createElement('button')
@@ -169,8 +177,6 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     cancelButton.className = 'cancel-button'
     cancelButton.addEventListener('click', (e) => {
         e.preventDefault()
-
-        // Remove the textarea
     })
 
     const buttonsWrapper = document.createElement('div')
@@ -188,11 +194,6 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
 
     bookmarkListElem.appendChild(newBookmarkElement);
 };
-
-function resizeTextarea(ev) {
-    this.style.height = '24px';
-    this.style.height = this.scrollHeight + 12 + 'px';
-}
 
 /**
  * @description Create a new element with an SVG icon and a callback that runs when the element is clicked.
@@ -245,6 +246,38 @@ export const handleDeleteBookmark = async (bookmarkTime) => {
             }),
         });
     }
+
+    await handleFilteredBookmarks();
+};
+
+/**
+ * @description Edit the bookmark with a new "note".
+ * @param {Object} bookmarkToEdit 
+ * @param {String} newNote 
+ */
+export const handleEditBookmarkNote = async (bookmarkToEdit, newNote) => {
+    await fetchBookmarks();
+
+    const newCurrentVideoBookmarks = state.currentVideoBookmarks.map((bookmark) => {
+        if (bookmark.time !== bookmarkToEdit.time) {
+            return bookmark
+        }
+
+        const { dataUrl, ...restOfBookmarkToEdit } = bookmarkToEdit
+
+        return {
+            ...restOfBookmarkToEdit,
+            note: newNote
+        }
+    });
+
+    await chrome.storage.sync.set({
+        [state.currentVideoId]: JSON.stringify({
+            ...state.currentVideoFullObj,
+            bookmarks: newCurrentVideoBookmarks,
+            updatedAt: new Date(),
+        }),
+    });
 
     await handleFilteredBookmarks();
 };

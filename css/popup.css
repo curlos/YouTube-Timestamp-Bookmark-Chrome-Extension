@@ -401,3 +401,7 @@ input:checked + .slider:before {
 .form-buttons-wrapper button.cancel-button:hover {
     background-color: #8c8b8b;
 }
+
+.hide-note {
+    display: none;
+}
