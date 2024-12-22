@@ -12,5 +12,6 @@ export const state = {
     video: {
         currentTime: 0,
         duration: 100
-    }
+    },
+    bookmarkElements: []
 }

@@ -66,14 +66,23 @@ export const renderBookmarkElementsForCurrentVideo = async () => {
         return;
     }
 
-    for (let i = 0; i < state.currentVideoBookmarks.length; i++) {
-        const { time } = state.currentVideoBookmarks[i];
-        const bookmark = state.currentVideoBookmarks[i]
+    const bookmarksWithProgress = state.currentVideoBookmarks && state.currentVideoBookmarks.map((bookmark) => {
+        return {
+            ...bookmark,
+            finished: false
+        }
+    })
+
+    state.bookmarkElements = []
+
+    for (let index = 0; index < state.currentVideoBookmarks.length; index++) {
+        const { time } = state.currentVideoBookmarks[index];
+        const bookmark = state.currentVideoBookmarks[index]
         const bookmarkWithDataUrl = state.currentVideoBookmarksWithDataUrlByTime[Math.floor(time)];
         const dataUrl = bookmarkWithDataUrl && bookmarkWithDataUrl.dataUrl
-        const isLastIndex = i === state.currentVideoBookmarks.length - 1;
+        const isLastIndex = index === state.currentVideoBookmarks.length - 1;
 
-        await addNewBookmarkElem(bookmarkListElem, bookmark, dataUrl, isLastIndex);
+        await addNewBookmarkElem(bookmarkListElem, bookmark, dataUrl, isLastIndex, index, bookmarksWithProgress);
     }
 
     renderDeleteVideoBookmarksButton()
@@ -85,7 +94,7 @@ export const renderBookmarkElementsForCurrentVideo = async () => {
  * @param {Object} bookmark 
  * @param {Boolean} isLastIndex 
  */
-export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, isLastIndex) => {
+export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, isLastIndex, index, bookmarksWithProgress) => {
     const showCapturedFrames = state.userSettings.captureFrames;
 
     const bookmarkTitleElement = document.createElement("div");
@@ -231,8 +240,39 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
         }
 
         setInterval(() => {
-            progress = (state.video.currentTime / state.video.duration) * 100;
+            if (state.video.currentTime >= bookmark.time) {
+                const bookmarkJustFinished = !bookmarksWithProgress[index].finished
+                const notTheLastBookmark = index !== bookmarksWithProgress.length - 1
+
+                // Scroll the next bookmark into view once the current one finishes.
+                if (bookmarkJustFinished && notTheLastBookmark) {
+                    const nextBookmarkElement = state.bookmarkElements[index + 1]
+                    
+                    nextBookmarkElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "end"
+                    })
+                }
+
+                bookmarksWithProgress[index].finished = true
+            } else {
+                bookmarksWithProgress[index].finished = false
+            }
+
+            const prevBookmark = index !== 0 && bookmarksWithProgress[index - 1]
+            const prevTimestampCompleted = prevBookmark && prevBookmark.finished
+
+            if (index === 0) {
+                progress = (state.video.currentTime / bookmark.time) * 100;
+            } else if (prevTimestampCompleted) {
+                // TODO: Still a little confused but visually this does what I want.
+                progress = ((state.video.currentTime - prevBookmark.time) / (bookmark.time - prevBookmark.time)) * 100;
+            } else {
+                progress = 0
+            }
+            
             updateProgress(progress);
+            
         }, 100);
     }
 
@@ -245,6 +285,8 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
     newBookmarkElement.appendChild(noteElement);
     newBookmarkElement.appendChild(formElement);
+
+    state.bookmarkElements.push(newBookmarkElement)
 
     bookmarkListElem.appendChild(newBookmarkElement);
 };
