@@ -1,6 +1,9 @@
 import { state } from "./state.js";
 import { fetchUserSettings } from "./helpers.js";
 import { renderSpinnerCurrentVideoBookmarks, setCapturedFramesAndRender, renderBookmarkElementsForCurrentVideo } from './currentVideoBookmarks.js'
+import { createCustomRadioButton } from './customRadioButton.js'
+
+const SORT_BY_OPTION_LIST = ['Newest', 'Oldest', 'Most Bookmarks', 'Least Bookmarks']
 
 /**
  * @description Render the right "Settings" button that when clicked will open or close the "Settings" sidebar modal view.
@@ -53,6 +56,11 @@ export const renderSettingsModalContent = async () => {
         await fetchUserSettings();
     }
 
+    renderCaptureFramesCheckbox()
+    renderSortByOptions()
+};
+
+const renderCaptureFramesCheckbox = () => {
     const captureFramesCheckbox = document.getElementById("capture-frames-checkbox");
     captureFramesCheckbox.checked = state.userSettings.captureFrames ? true : false;
 
@@ -75,4 +83,41 @@ export const renderSettingsModalContent = async () => {
             await renderBookmarkElementsForCurrentVideo();
         }
     });
-};
+}
+
+const renderSortByOptions = async () => {
+    const sortByOptionsElem = document.querySelector('.sort-by-options')
+    sortByOptionsElem.innerHTML = ''
+
+    console.log(state.userSettings)
+
+    if (!state.userSettings.sortBy) {
+        state.userSettings.sortBy = SORT_BY_OPTION_LIST[0]
+
+        await updateUserSettings(state.userSettings)
+    }
+
+    SORT_BY_OPTION_LIST.forEach((sortByOption) => {
+        // // Create multiple radio buttons
+        const radio1 = createCustomRadioButton({
+            label: sortByOption,
+            name: sortByOption,
+            checked: state.userSettings.sortBy === sortByOption,
+            onChange: async () => {
+                state.userSettings.sortBy = sortByOption
+                await updateUserSettings(state.userSettings)
+                renderSortByOptions()
+            },
+        });
+
+        sortByOptionsElem.appendChild(radio1)
+    })
+}
+
+const updateUserSettings = async (newUserSettings) => {
+    await chrome.storage.sync.set({
+        userSettings: JSON.stringify(newUserSettings),
+    });
+
+    await fetchUserSettings();
+}

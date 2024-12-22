@@ -1,8 +1,10 @@
 <link href="css/popup.css" rel="stylesheet" type="text/css" />
+<link href="css/customRadioButton.css" rel="stylesheet" type="text/css" />
 
 <script src="js/utils.js"></script>
 <script type="module" src="js/popup/state.js"></script>
 <script type="module" src="js/popup/helpers.js"></script>
+<script type="module" src="js/popup/customRadioButton.js"></script>
 <script type="module" src="js/popup/currentVideoBookmarks.js"></script>
 <script type="module" src="js/popup/videosWithBookmarks.js"></script>
 <script type="module" src="js/popup/settings.js"></script>
@@ -28,12 +30,20 @@
 
         <div id="sidebar-settings-wrapper" class="sidebar-modal-right">
             <div class="sidebar-settings-list gray-scrollbar">
-                <div class="settings-capture-frame">
-                    <label class="switch">
-                        <input id="capture-frames-checkbox" type="checkbox" checked>
-                        <span class="slider round"></span>
-                    </label>
-                    Capture Frames
+                <div>
+                    <div class="settings-title">Sort By <span>(Videos With Bookmarks)</span></div>
+                    <div class="sort-by-options"></div>
+                </div>
+
+                <div>
+                    <div class="settings-title">Other</div>
+                    <div class="settings-capture-frame">
+                        <label class="switch">
+                            <input id="capture-frames-checkbox" type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        Capture Frames
+                    </div>
                 </div>
             </div>
         </div>

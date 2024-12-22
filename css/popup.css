@@ -1,6 +1,6 @@
 html {
     background-color: rgb(50, 50, 50);
-    width: 280px;
+    width: 320px;
     overflow: none;
 }
 
@@ -11,7 +11,7 @@ body {
 }
 
 .container {
-    width: 280px;
+    width: 100%;
     color: white;
 }
 
@@ -62,7 +62,7 @@ body {
 }
 
 .bookmark-title {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .bookmark-title:hover {
@@ -297,10 +297,6 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-.sidebar-settings-list {
-    padding: 8px;
-}
-
 .settings-capture-frame {
     display: flex;
     align-items: center;
@@ -324,4 +320,28 @@ input:checked + .slider:before {
 .delete-icon-inner-wrapper:hover {
     cursor: pointer;
     background-color: rgba(217, 77, 77, 1);
+}
+
+.sidebar-settings-list {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.settings-title span {
+    color: #BBBBBB;
+}
+
+.sort-by-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 16px;
 }
