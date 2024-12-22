@@ -90,7 +90,7 @@ const getVideoWithBookmarksElem = (videoId) => {
 
     deleteIconInnerWrapper.addEventListener('click', async (e) => {
         e.stopPropagation()
-        await chrome.storage.sync.remove(state.currentVideoId);
+        await chrome.storage.sync.remove(videoId);
         await handleFilteredBookmarks();
     })
 
