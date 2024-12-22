@@ -307,3 +307,21 @@ input:checked + .slider:before {
     gap: 10px;
     font-size: 16px;
 }
+
+.delete-icon-outer-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.delete-icon-inner-wrapper {
+    padding: 4px;
+    padding-left: 2px;
+    padding-right: 5px;
+    border-radius: 2px;
+}
+
+.delete-icon-inner-wrapper:hover {
+    cursor: pointer;
+    background-color: rgba(217, 77, 77, 1);
+}

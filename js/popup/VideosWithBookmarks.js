@@ -80,9 +80,25 @@ const getVideoWithBookmarksElem = (videoId) => {
     const bookmarksNumberElement = document.createElement("div");
     bookmarksNumberElement.textContent =
         video.bookmarks.length > 1 ? `${video.bookmarks.length} Bookmarks` : `${video.bookmarks.length} Bookmark`;
+    
+    const deleteIconOuterWrapper = document.createElement('div')
+    deleteIconOuterWrapper.className = 'delete-icon-outer-wrapper'
+
+    const deleteIconInnerWrapper = document.createElement('div')
+    deleteIconInnerWrapper.className = 'delete-icon-inner-wrapper'
+    deleteIconInnerWrapper.innerHTML = getIconSVG("delete");
+
+    deleteIconInnerWrapper.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        await chrome.storage.sync.remove(state.currentVideoId);
+        await handleFilteredBookmarks();
+    })
+
+    deleteIconOuterWrapper.appendChild(deleteIconInnerWrapper)
 
     videoInfoElem.appendChild(titleElement);
     videoInfoElem.appendChild(bookmarksNumberElement);
+    videoInfoElem.appendChild(deleteIconOuterWrapper);
 
     videoWithBookmarksElem.appendChild(thumbnailImageElement);
     videoWithBookmarksElem.appendChild(videoInfoElem);
