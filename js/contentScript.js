@@ -34,8 +34,10 @@ const fetchBookmarks = async () => {
  * @description Add a new bookmark to the current video using the current time.
  */
 const handleAddNewBookmark = async () => {
-    const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
-    bookmarkButton.disabled = true;
+    const bookmarkButtons = Array.from(document.querySelectorAll(".bookmark-btn"));
+    bookmarkButtons.forEach((bookmarkButton) => {
+        bookmarkButton.disabled = true
+    })
 
     const currentTime = videoElem.currentTime;
     const newBookmark = {
@@ -100,14 +102,15 @@ const getThumbnailUrl = () => {
 /**
  * @description When a new video is loaded, get that video's bookmarks and add the bookmark button to the video player's right controls if it hasn't been added yet.
  */
-const newVideoLoaded = async () => {
-    const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
+const addBookmarkButtonToVideo = async () => {
     await fetchBookmarks();
 
     if (currentVideoId) {
         if (!videoElem) {
             videoElem = document.getElementsByClassName("video-stream")[0];
         }
+
+        const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
 
         if (!bookmarkBtnExists || currentVideoType === "shorts") {
             switch (currentVideoType) {
@@ -121,10 +124,10 @@ const newVideoLoaded = async () => {
                     // "Shorts" work differently than normal videos. On a normal video page, you'll have only video element with a set of left and right controls so I'd only have to edit the one set of controls. However, with a short, there's infinite scrolling. For YouTube to have infinite scrolling enabled, they load many "Shorts" at once. So, if we're on a shorts video page, there could be 10-15+ videos loaded in the DOM.
                     // Because of the above, this means that the control element called "#actions" will appear for each video. So, we have to go through ALL of the actions elements and add the bookmark button to all of the ones that don't have it yet.
                     const actionsElemList = Array.from(document.querySelectorAll("#actions"));
-
+        
                     actionsElemList.forEach((actionsElem) => {
                         const hasBookmarkBtn = actionsElem.querySelector(".bookmark-btn");
-
+        
                         if (!hasBookmarkBtn) {
                             // A new bookmark element has to be created for each "actions" container.
                             const bookmarkBtnElement = createAndGetBookmarkBtnElement();
@@ -132,9 +135,9 @@ const newVideoLoaded = async () => {
                         }
                     });
             }
-        }
+        }   
     }
-};
+}
 
 /**
  * @description Creates and gets the bookmark SVG icon HTML Button element.
@@ -165,7 +168,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             resetGlobalVariables();
             currentVideoId = videoId;
             currentVideoType = videoType;
-            newVideoLoaded();
+            addBookmarkButtonToVideo();
             break;
         // For popup.js
         case "play-new-timestamp-in-video":
@@ -187,12 +190,15 @@ chrome.runtime.onMessage.addListener(async (obj) => {
         // For popup.js
         case "content-get-current-video-bookmarks-with-frames":
             await fetchUserSettings();
+            addBookmarkButtonToVideo()
 
-            const bookmarkButton = document.getElementsByClassName("bookmark-btn")[0];
+            const bookmarkButtons = Array.from(document.querySelectorAll(".bookmark-btn"));
 
             // If we don't need to capture frames, then return the current bookmarks. These bookmarks will have no "thumbnailImageSrc".
             if (!userSettings.captureFrames) {
-                bookmarkButton.disabled = false;
+                bookmarkButtons.forEach((bookmarkButton) => {
+                    bookmarkButton.disabled = false
+                })
                 return currentVideoBookmarks;
             }
 
@@ -248,7 +254,9 @@ chrome.runtime.onMessage.addListener(async (obj) => {
                 videoElem.currentTime = timestampBeforeCapturing;
             }
 
-            bookmarkButton.disabled = false;
+            bookmarkButtons.forEach((bookmarkButton) => {
+                bookmarkButton.disabled = false
+            })
 
             return newCurrentVideoBookmarksWithFrames;
     }
@@ -277,7 +285,7 @@ const resetGlobalVariables = () => {
 };
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
-newVideoLoaded();
+addBookmarkButtonToVideo();
 
 // Send a message to background.js telling it that the contentScript is ready.
 chrome.runtime.sendMessage({ type: "ready" });

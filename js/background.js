@@ -62,7 +62,8 @@ const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
     const tabId = activeTab.id;
 
     // Wait for the tab to be ready
-    await waitForTabToBeReady();
+    // TODO: May have to investigate this later to fix the big background bug.
+    // await waitForTabToBeReady();
 
     chrome.tabs.sendMessage(
         tabId,
