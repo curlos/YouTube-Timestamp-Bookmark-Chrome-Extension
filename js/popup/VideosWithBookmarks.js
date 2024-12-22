@@ -55,53 +55,58 @@ export const renderSidebarModalWithVideos = async () => {
 
     // Go through all the videos and render the thumbnail image, video title, and the number of bookmarks for that video.
     sortedVideosWithBookmarksVideoIds.forEach((videoId) => {
-        const video = JSON.parse(state.allVideosWithBookmarks[videoId]);
-
-        const videoWithBookmarksElem = document.createElement("div");
-        videoWithBookmarksElem.className = "video-with-bookmarks";
-
-        const thumbnailImageElement = document.createElement("img");
-        thumbnailImageElement.src = video.thumbnailImageSrc;
-
-        const videoInfoElem = document.createElement("div");
-
-        const titleElement = document.createElement("div");
-        titleElement.textContent = video.title;
-        titleElement.className = "video-with-bookmarks-title";
-
-        const bookmarksNumberElement = document.createElement("div");
-        bookmarksNumberElement.textContent =
-            video.bookmarks.length > 1 ? `${video.bookmarks.length} Bookmarks` : `${video.bookmarks.length} Bookmark`;
-
-        videoInfoElem.appendChild(titleElement);
-        videoInfoElem.appendChild(bookmarksNumberElement);
-
-        videoWithBookmarksElem.appendChild(thumbnailImageElement);
-        videoWithBookmarksElem.appendChild(videoInfoElem);
-
-        // When the video container is clicked, navigate to that video's page.
-        videoWithBookmarksElem.addEventListener("click", async () => {
-            const videoURL =
-                video.videoType === "shorts"
-                    ? `https://www.youtube.com/shorts/${videoId}`
-                    : `https://www.youtube.com/watch?v=${videoId}`;
-            const activeTab = await getActiveTab();
-
-            if (state.currentVideoId !== videoId) {
-                chrome.tabs.update(activeTab.id, {
-                    url: videoURL,
-                });
-            }
-
-            // Close the popup after navigating to the new video page.
-            window.close();
-        });
-
+        const videoWithBookmarksElem = getVideoWithBookmarksElem(videoId)
         sidebarVideoListElem.appendChild(videoWithBookmarksElem);
     });
 
     await renderDeleteAllBookmarksButton();
 };
+
+const getVideoWithBookmarksElem = (videoId) => {
+    const video = JSON.parse(state.allVideosWithBookmarks[videoId]);
+
+    const videoWithBookmarksElem = document.createElement("div");
+    videoWithBookmarksElem.className = "video-with-bookmarks";
+
+    const thumbnailImageElement = document.createElement("img");
+    thumbnailImageElement.src = video.thumbnailImageSrc;
+
+    const videoInfoElem = document.createElement("div");
+
+    const titleElement = document.createElement("div");
+    titleElement.textContent = video.title;
+    titleElement.className = "video-with-bookmarks-title";
+
+    const bookmarksNumberElement = document.createElement("div");
+    bookmarksNumberElement.textContent =
+        video.bookmarks.length > 1 ? `${video.bookmarks.length} Bookmarks` : `${video.bookmarks.length} Bookmark`;
+
+    videoInfoElem.appendChild(titleElement);
+    videoInfoElem.appendChild(bookmarksNumberElement);
+
+    videoWithBookmarksElem.appendChild(thumbnailImageElement);
+    videoWithBookmarksElem.appendChild(videoInfoElem);
+
+    // When the video container is clicked, navigate to that video's page.
+    videoWithBookmarksElem.addEventListener("click", async () => {
+        const videoURL =
+            video.videoType === "shorts"
+                ? `https://www.youtube.com/shorts/${videoId}`
+                : `https://www.youtube.com/watch?v=${videoId}`;
+        const activeTab = await getActiveTab();
+
+        if (state.currentVideoId !== videoId) {
+            chrome.tabs.update(activeTab.id, {
+                url: videoURL,
+            });
+        }
+
+        // Close the popup after navigating to the new video page.
+        window.close();
+    });
+
+    return videoWithBookmarksElem
+}
 
 /**
  * @description Render the "Delete All Bookmarks" button at the bottom of the "Video With Bookmarks" sidebar modal view. When clicked, it will remove all videos and their bookmarks from the Chrome Storage.
