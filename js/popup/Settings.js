@@ -2,7 +2,7 @@ import { state } from "./state.js";
 import { fetchUserSettings } from "./helpers.js";
 import { renderSpinnerCurrentVideoBookmarks, setCapturedFramesAndRender, renderBookmarkElementsForCurrentVideo } from './currentVideoBookmarks.js'
 import { createCustomRadioButton } from './customRadioButton.js'
-import { renderSidebarModalWithVideos } from "./videosWithBookmarks.js";
+import { renderSidebarModalWithVideos, toggleVideosWithBookmarksSidebarModal } from "./videosWithBookmarks.js";
 
 const SORT_BY_OPTION_LIST = ['Most Recently Updated', 'Least Recently Updated', 'Most Bookmarks', 'Least Bookmarks']
 
@@ -108,7 +108,8 @@ const renderSortByOptions = async () => {
                 state.userSettings.sortBy = sortByOption
                 await updateUserSettings(state.userSettings)
                 renderSortByOptions()
-                renderSidebarModalWithVideos()
+                await renderSidebarModalWithVideos()
+                toggleVideosWithBookmarksSidebarModal()
             },
         });
 

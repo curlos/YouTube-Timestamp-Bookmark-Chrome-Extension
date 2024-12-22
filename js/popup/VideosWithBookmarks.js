@@ -8,30 +8,34 @@ export const renderLeftMenuButton = () => {
     const menuDiv = document.getElementById("menu-svg-wrapper");
     menuDiv.innerHTML = getIconSVG("menu");
     menuDiv.addEventListener("click", () => {
-        const sidebarSettingsWrapper = document.getElementById("sidebar-settings-wrapper");
-        sidebarSettingsWrapper.classList.remove("sidebar-shown-right");
-
-        const sidebarVideosWrapper = document.getElementById("sidebar-videos-wrapper");
-        sidebarVideosWrapper.classList.add("sidebar-transition");
-        sidebarVideosWrapper.classList.toggle("sidebar-shown");
-
-        const isSidebarModalOpen = sidebarVideosWrapper.classList.contains("sidebar-shown");
-
-        if (isSidebarModalOpen) {
-            document.querySelector(".title").textContent = "Videos With Bookmarks";
-            return;
-        }
-
-        if (state.currentVideoId) {
-            document.querySelector(".title").textContent = "Bookmarks For This Video";
-            return;
-        }
-
-        // If the sidebar video list modal is not open and there's no video id, then show the settings sidebar modal
-        sidebarSettingsWrapper.classList.add("sidebar-shown-right");
-        document.querySelector(".title").textContent = "Settings";
+        toggleVideosWithBookmarksSidebarModal()
     });
 };
+
+export const toggleVideosWithBookmarksSidebarModal = () => {
+    const sidebarSettingsWrapper = document.getElementById("sidebar-settings-wrapper");
+    sidebarSettingsWrapper.classList.remove("sidebar-shown-right");
+
+    const sidebarVideosWrapper = document.getElementById("sidebar-videos-wrapper");
+    sidebarVideosWrapper.classList.add("sidebar-transition");
+    sidebarVideosWrapper.classList.toggle("sidebar-shown");
+
+    const isSidebarModalOpen = sidebarVideosWrapper.classList.contains("sidebar-shown");
+
+    if (isSidebarModalOpen) {
+        document.querySelector(".title").textContent = "Videos With Bookmarks";
+        return;
+    }
+
+    if (state.currentVideoId) {
+        document.querySelector(".title").textContent = "Bookmarks For This Video";
+        return;
+    }
+
+    // If the sidebar video list modal is not open and there's no video id, then show the settings sidebar modal
+    sidebarSettingsWrapper.classList.add("sidebar-shown-right");
+    document.querySelector(".title").textContent = "Settings";
+}
 
 /**
  * @description Render a sidebar modal that shows a list of videos with their thumbnail image, title, and number of bookmarks.
