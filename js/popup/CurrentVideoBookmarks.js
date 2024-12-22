@@ -231,18 +231,8 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
         }
 
         setInterval(() => {
-            chrome.tabs.sendMessage(
-                state.activeTab.id,
-                { type: "content-get-current-video-time-and-duration" },
-                {},
-                (videoCurrentTimeAndDuration) => {
-                    const { currentTime, duration } = videoCurrentTimeAndDuration
-
-                    progress = (currentTime / duration) * 100;
-                    updateProgress(progress);
-
-                },
-            );
+            progress = (state.video.currentTime / state.video.duration) * 100;
+            updateProgress(progress);
         }, 100);
     }
 

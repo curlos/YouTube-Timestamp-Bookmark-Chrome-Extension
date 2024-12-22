@@ -8,5 +8,9 @@ export const state = {
     allVideosWithBookmarks: null,
     currentVideoFullObj: null,
     userSettings: null,
-    activeTab: null
+    activeTab: null,
+    video: {
+        currentTime: 0,
+        duration: 100
+    }
 }
