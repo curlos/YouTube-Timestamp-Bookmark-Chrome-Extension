@@ -260,6 +260,17 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             })
 
             return newCurrentVideoBookmarksWithFrames;
+        case "content-get-current-video-time-and-duration":
+            if (!videoElem) {
+                videoElem = document.getElementsByClassName("video-stream")[0];
+            }
+
+            const { currentTime, duration } = videoElem
+
+            return {
+                currentTime,
+                duration
+            }
     }
 });
 

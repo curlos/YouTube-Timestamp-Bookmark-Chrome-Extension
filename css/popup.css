@@ -405,3 +405,29 @@ input:checked + .slider:before {
 .hide-note {
     display: none;
 }
+  
+  .progress-container {
+    position: relative;
+    width: 100%; /* Adjust to your preferred width */
+    height: 5px; /* Height of the progress bar */
+    background-color: gray; /* Background track color */
+  }
+  
+  .progress-bar {
+    position: absolute;
+    height: 100%;
+    background-color: red; /* Progress fill color */
+    transition: width 0.3s ease; /* Smooth transition for progress */
+  }
+  
+  .progress-thumb {
+    position: absolute;
+    top: -3px; /* Center the thumb vertically */
+    height: 11px;
+    width: 11px;
+    background-color: red; /* Thumb color */
+    border-radius: 50%; /* Makes the thumb circular */
+    transition: left 0.3s ease; /* Smooth movement */
+    pointer-events: none; /* Makes the thumb non-interactable */
+  }
+  

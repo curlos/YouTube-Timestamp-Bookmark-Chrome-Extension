@@ -96,6 +96,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
     const formElement = document.createElement('form')
     const textareaElement = document.createElement('textarea')
     const noteElement = document.createElement('div')
+    const progressContainer = document.createElement("div");
 
     const toggleEditNoteForm = () => {
         formElement.classList.toggle('show-edit-form')
@@ -196,13 +197,64 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
         formElement.appendChild(buttonsWrapper)
     }
 
+    const addProgressBar = () => {
+        progressContainer.classList.add("progress-container");
+
+        // Create progress bar
+        const progressBar = document.createElement("div");
+        progressBar.classList.add("progress-bar");
+
+        // Create progress fill
+        const progressFill = document.createElement("div");
+        progressFill.classList.add("progress-fill");
+
+        // Append progress fill to progress bar
+        progressBar.appendChild(progressFill);
+
+        // Create progress thumb
+        const progressThumb = document.createElement("div");
+        progressThumb.classList.add("progress-thumb");
+
+        // Append progress bar and thumb to the container
+        progressContainer.appendChild(progressBar);
+        progressContainer.appendChild(progressThumb);
+
+        let progress = 0; // Initial progress (0 to 100)
+
+        // Function to update progress bar
+        function updateProgress(value) {
+            progress = Math.min(Math.max(value, 0), 100); // Clamps the value between 0 and 100
+            const widthPercentage = `${progress}%`;
+
+            progressBar.style.width = widthPercentage;
+            progressThumb.style.left = `calc(${widthPercentage} - 5.5px)`; // Adjust thumb position
+        }
+
+        setInterval(() => {
+            chrome.tabs.sendMessage(
+                state.activeTab.id,
+                { type: "content-get-current-video-time-and-duration" },
+                {},
+                (videoCurrentTimeAndDuration) => {
+                    const { currentTime, duration } = videoCurrentTimeAndDuration
+
+                    progress = (currentTime / duration) * 100;
+                    updateProgress(progress);
+
+                },
+            );
+        }, 100);
+    }
+
     addTimestampControlsAndFrame()
     addFormWithTextareaAndButtons()
+    addProgressBar()
 
     showCapturedFrames && newBookmarkElement.appendChild(timestampImgElement);
+    newBookmarkElement.appendChild(progressContainer);
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
     newBookmarkElement.appendChild(noteElement);
-    newBookmarkElement.appendChild(formElement)
+    newBookmarkElement.appendChild(formElement);
 
     bookmarkListElem.appendChild(newBookmarkElement);
 };

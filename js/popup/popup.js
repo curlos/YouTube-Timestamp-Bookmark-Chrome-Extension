@@ -9,6 +9,8 @@ import { renderRightSettingsButton, renderSettingsModalContent } from './setting
 document.onreadystatechange = async () => {
     if (document.readyState === "complete") {
         const activeTab = await getActiveTab();
+        state.activeTab = activeTab
+
         const queryParams = activeTab.url.split("?")[1];
         const urlParams = new URLSearchParams(queryParams);
 

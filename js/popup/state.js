@@ -7,5 +7,6 @@ export const state = {
     currentVideoId: null,
     allVideosWithBookmarks: null,
     currentVideoFullObj: null,
-    userSettings: null
+    userSettings: null,
+    activeTab: null
 }
