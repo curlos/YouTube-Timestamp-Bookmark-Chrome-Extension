@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { getAllVideosWithBookmarks, handleFilteredBookmarks } from './helpers.js'
+import { getAllVideosWithBookmarks, handleFilteredBookmarks, fetchUserSettings } from './helpers.js'
 
 /**
  * @description Renders the left "menu" button that when clicked will open or close the "Videos With Bookmarks" sidebar modal.
@@ -40,6 +40,7 @@ export const renderSidebarModalWithVideos = async () => {
     const sidebarVideoListElem = document.querySelector(".sidebar-video-list");
     sidebarVideoListElem.innerHTML = "";
 
+    await fetchUserSettings()
     await getAllVideosWithBookmarks();
 
     // Sort the videos from most recently updated to least recently updated.
@@ -50,7 +51,22 @@ export const renderSidebarModalWithVideos = async () => {
         const dateA = new Date(objA.updatedAt);
         const dateB = new Date(objB.updatedAt);
 
-        return dateB - dateA;
+        const numOfBookmarksA = objA.bookmarks.length
+        const numOfBookmarksB = objB.bookmarks.length
+
+        switch (state.userSettings.sortBy) {
+            case 'Most Recently Updated':
+                return dateB - dateA;
+            case 'Least Recently Updated':
+                return dateA - dateB;
+            case 'Most Bookmarks':
+                return numOfBookmarksB - numOfBookmarksA
+            case 'Least Bookmarks':
+                return numOfBookmarksA - numOfBookmarksB
+            default:
+                // By default, sort by most recently updated first.
+                return dateB - dateA;
+        }
     })
 
     // Go through all the videos and render the thumbnail image, video title, and the number of bookmarks for that video.

@@ -2,8 +2,9 @@ import { state } from "./state.js";
 import { fetchUserSettings } from "./helpers.js";
 import { renderSpinnerCurrentVideoBookmarks, setCapturedFramesAndRender, renderBookmarkElementsForCurrentVideo } from './currentVideoBookmarks.js'
 import { createCustomRadioButton } from './customRadioButton.js'
+import { renderSidebarModalWithVideos } from "./videosWithBookmarks.js";
 
-const SORT_BY_OPTION_LIST = ['Newest', 'Oldest', 'Most Bookmarks', 'Least Bookmarks']
+const SORT_BY_OPTION_LIST = ['Most Recently Updated', 'Least Recently Updated', 'Most Bookmarks', 'Least Bookmarks']
 
 /**
  * @description Render the right "Settings" button that when clicked will open or close the "Settings" sidebar modal view.
@@ -107,6 +108,7 @@ const renderSortByOptions = async () => {
                 state.userSettings.sortBy = sortByOption
                 await updateUserSettings(state.userSettings)
                 renderSortByOptions()
+                renderSidebarModalWithVideos()
             },
         });
 
