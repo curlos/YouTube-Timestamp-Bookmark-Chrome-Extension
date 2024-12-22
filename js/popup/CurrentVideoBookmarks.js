@@ -91,6 +91,9 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     const newBookmarkElement = document.createElement("div");
     const newBookmarkBottomWrapperElement = document.createElement("div");
     const timestampImgElement = showCapturedFrames && document.createElement("img");
+    const formElement = document.createElement('form')
+    const textareaElement = document.createElement('textarea')
+    const noteElement = document.createElement('div')
 
     bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
     bookmarkTitleElement.className = "bookmark-title";
@@ -118,7 +121,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
     setControlBookmarkSVGElem(
         "pen-to-square",
         () => {
-            handlePlayVideo(bookmark.time);
+            formElement.classList.toggle('show-edit-form')
         },
         controlsElement,
     );
@@ -143,11 +146,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, isLastIndex
         newBookmarkElement.classList.add("bookmark-no-bottom-border");
     }
 
-    const noteElement = document.createElement('div')
     noteElement.textContent = 'Paulie about to shoot Mikey witih a crazed look on his face'
-
-    const formElement = document.createElement('form')
-    const textareaElement = document.createElement('textarea')
 
     textareaElement.addEventListener("input", function () {
         this.style.height = "auto"; // Reset the height
