@@ -102,91 +102,102 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
         noteElement.classList.toggle('hide-note')
     }
 
-    bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
-    bookmarkTitleElement.className = "bookmark-title";
-    bookmarkTitleElement.addEventListener("click", () => {
-        handlePlayVideo(bookmark.time);
-    });
+    const setControlElems = (bookmark, controlsElement, toggleEditNoteForm) => {
+        setControlBookmarkSVGElem(
+            "play",
+            () => {
+                handlePlayVideo(bookmark.time);
+            },
+            controlsElement,
+        );
+    
+        setControlBookmarkSVGElem(
+            "pen-to-square",
+            () => {
+                toggleEditNoteForm()
+            },
+            controlsElement,
+        );
+    
+        setControlBookmarkSVGElem(
+            "delete",
+            () => {
+                handleDeleteBookmark(bookmark.time);
+            },
+            controlsElement,
+        );
+    }
 
-    controlsElement.className = "bookmark-controls";
-
-    showCapturedFrames && (timestampImgElement.src = dataUrl);
-    showCapturedFrames && (timestampImgElement.className = "timestamp-img");
-    showCapturedFrames &&
-        timestampImgElement.addEventListener("click", () => {
+    const addTimestampControlsAndFrame = () => {
+        bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
+        bookmarkTitleElement.className = "bookmark-title";
+        bookmarkTitleElement.addEventListener("click", () => {
             handlePlayVideo(bookmark.time);
         });
 
-    setControlBookmarkSVGElem(
-        "play",
-        () => {
-            handlePlayVideo(bookmark.time);
-        },
-        controlsElement,
-    );
+        controlsElement.className = "bookmark-controls";
 
-    setControlBookmarkSVGElem(
-        "pen-to-square",
-        () => {
-            toggleEditNoteForm()
-        },
-        controlsElement,
-    );
+        showCapturedFrames && (timestampImgElement.src = dataUrl);
+        showCapturedFrames && (timestampImgElement.className = "timestamp-img");
+        showCapturedFrames &&
+            timestampImgElement.addEventListener("click", () => {
+                handlePlayVideo(bookmark.time);
+            });
 
-    setControlBookmarkSVGElem(
-        "delete",
-        () => {
-            handleDeleteBookmark(bookmark.time);
-        },
-        controlsElement,
-    );
+        setControlElems(bookmark, controlsElement, toggleEditNoteForm)
 
-    newBookmarkElement.id = "bookmark-" + bookmark.time;
-    newBookmarkElement.className = "bookmark-container";
-    newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper";
+        newBookmarkElement.id = "bookmark-" + bookmark.time;
+        newBookmarkElement.className = "bookmark-container";
+        newBookmarkBottomWrapperElement.className = "bookmark-bottom-wrapper";
 
-    showCapturedFrames && newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
-    newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement);
-    newBookmarkBottomWrapperElement.appendChild(controlsElement);
+        showCapturedFrames && newBookmarkBottomWrapperElement.appendChild(timestampImgElement);
+        newBookmarkBottomWrapperElement.appendChild(bookmarkTitleElement);
+        newBookmarkBottomWrapperElement.appendChild(controlsElement);
 
-    if (isLastIndex) {
-        newBookmarkElement.classList.add("bookmark-no-bottom-border");
+        if (isLastIndex) {
+            newBookmarkElement.classList.add("bookmark-no-bottom-border");
+        }
     }
 
-    noteElement.textContent = bookmark.note || ''
-    textareaElement.textContent = bookmark.note || ''
+    const addFormWithTextareaAndButtons = () => {
+        noteElement.textContent = bookmark.note || ''
+        textareaElement.textContent = bookmark.note || ''
 
-    textareaElement.addEventListener("input", function () {
-        this.style.height = "auto"; // Reset the height
-        this.style.height = `${this.scrollHeight}px`; // Set it to the scroll height
-    });
+        textareaElement.addEventListener("input", function () {
+            this.style.height = "auto"; // Reset the height
+            this.style.height = `${this.scrollHeight}px`; // Set it to the scroll height
+        });
 
-    const submitButton = document.createElement('button')
-    submitButton.textContent = 'Submit'
-    submitButton.className = 'submit-button'
-    submitButton.type = 'submit'
-    
-    formElement.addEventListener('submit', async (e) => {
-        e.preventDefault()
-        const newNote = textareaElement.value
-        await handleEditBookmarkNote(bookmark, newNote)
-    })
+        const submitButton = document.createElement('button')
+        submitButton.textContent = 'Submit'
+        submitButton.className = 'submit-button'
+        submitButton.type = 'submit'
+        
+        formElement.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const newNote = textareaElement.value
+            await handleEditBookmarkNote(bookmark, newNote)
+        })
 
-    const cancelButton = document.createElement('button')
-    cancelButton.textContent = 'Cancel'
-    cancelButton.className = 'cancel-button'
-    cancelButton.addEventListener('click', (e) => {
-        e.preventDefault()
-        toggleEditNoteForm()
-    })
+        const cancelButton = document.createElement('button')
+        cancelButton.textContent = 'Cancel'
+        cancelButton.className = 'cancel-button'
+        cancelButton.addEventListener('click', (e) => {
+            e.preventDefault()
+            toggleEditNoteForm()
+        })
 
-    const buttonsWrapper = document.createElement('div')
-    buttonsWrapper.className = 'form-buttons-wrapper'
-    buttonsWrapper.appendChild(cancelButton)
-    buttonsWrapper.appendChild(submitButton)
+        const buttonsWrapper = document.createElement('div')
+        buttonsWrapper.className = 'form-buttons-wrapper'
+        buttonsWrapper.appendChild(cancelButton)
+        buttonsWrapper.appendChild(submitButton)
 
-    formElement.appendChild(textareaElement)
-    formElement.appendChild(buttonsWrapper)
+        formElement.appendChild(textareaElement)
+        formElement.appendChild(buttonsWrapper)
+    }
+
+    addTimestampControlsAndFrame()
+    addFormWithTextareaAndButtons()
 
     showCapturedFrames && newBookmarkElement.appendChild(timestampImgElement);
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
