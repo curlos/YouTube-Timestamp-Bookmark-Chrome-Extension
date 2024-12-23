@@ -5,6 +5,7 @@ import { handleFilteredBookmarks, fetchBookmarks } from './helpers.js'
  * @description Send the message to background.js that will then send a message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
  */
 export const setCapturedFramesAndRender = () => {
+    // TODO: Replace this with "chrome.tabs" to send a message to "contentScript.js" directly. Hopefully it fixes the other big bug too!
     chrome.runtime.sendMessage(
         { type: "background-get-current-video-bookmarks-with-frames" },
         async (currentVideoBookmarksWithFrames) => {
@@ -110,6 +111,11 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
     const toggleEditNoteForm = () => {
         formElement.classList.toggle('show-edit-form')
         noteElement.classList.toggle('hide-note')
+
+        if (formElement.classList.contains('show-edit-form')) {
+            textareaElement.focus()
+            textareaElement.selectionStart = textareaElement.value.length;
+        }
     }
 
     const setControlElems = (bookmark, controlsElement, toggleEditNoteForm) => {
@@ -272,7 +278,6 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
             }
             
             updateProgress(progress);
-            
         }, 100);
     }
 

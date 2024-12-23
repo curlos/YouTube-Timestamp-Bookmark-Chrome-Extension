@@ -1,5 +1,5 @@
 /**
- * @description Global state for the "popup.js" file.
+ * @description Shared state for the popup (across the 3 views "Videos With Bookmarks", "Bookmarks for current video", "Settings").
  */
 export const state = {
     currentVideoBookmarks: [], 
