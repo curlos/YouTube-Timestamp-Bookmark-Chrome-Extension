@@ -11,7 +11,9 @@ export const state = {
     activeTab: null,
     video: {
         currentTime: 0,
-        duration: 100
+        duration: 100,
+        intervalId: null
     },
-    bookmarkElements: []
+    bookmarkElements: [],
+    bookmarkProgressBarIntervalIds: [],
 }

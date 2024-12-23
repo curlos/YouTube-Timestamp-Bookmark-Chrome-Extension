@@ -62,6 +62,13 @@ export const renderBookmarkElementsForCurrentVideo = async () => {
     const bookmarkListElem = document.getElementById("bookmarks");
     bookmarkListElem.innerHTML = "";
 
+    // Clear all the setIntervals that could have been declared before.
+    state.bookmarkProgressBarIntervalIds.forEach((intervalId) => {
+        clearInterval(intervalId)
+    })
+
+    state.bookmarkProgressBarIntervalIds = []
+
     if (state.currentVideoBookmarks.length === 0) {
         bookmarkListElem.innerHTML = '<i class="row">No bookmarks to show</i>';
         return;
@@ -245,7 +252,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
             progressThumb.style.left = `calc(${widthPercentage} - 5.5px)`; // Adjust thumb position
         }
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             if (state.video.currentTime >= bookmark.time) {
                 const bookmarkJustFinished = !bookmarksWithProgress[index].finished
                 const notTheLastBookmark = index !== bookmarksWithProgress.length - 1
@@ -279,6 +286,8 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
             
             updateProgress(progress);
         }, 100);
+
+        state.bookmarkProgressBarIntervalIds.push(intervalId)
     }
 
     addTimestampControlsAndFrame()

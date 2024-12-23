@@ -22,6 +22,9 @@ document.onreadystatechange = async () => {
             state.currentVideoId = isYouTubeFullVideo ? urlParams.get("v") : getYouTubeShortsVideoId(activeTab.url);
         }
 
+        clearInterval(state.video.intervalId)
+        state.video.intervalId = null
+
         if (isYouTubeVideo && state.currentVideoId) {
             // Render everything including the bookmarks for the current video.
             renderSpinnerCurrentVideoBookmarks();
@@ -32,7 +35,7 @@ document.onreadystatechange = async () => {
 
             setCapturedFramesAndRender();
 
-            setInterval(() => {
+            state.video.intervalId = setInterval(() => {
                 chrome.tabs.sendMessage(
                     state.activeTab.id,
                     { type: "content-get-current-video-time-and-duration" },
