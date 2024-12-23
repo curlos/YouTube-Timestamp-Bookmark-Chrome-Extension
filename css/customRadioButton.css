@@ -12,7 +12,7 @@
 
 /* Outer Circle */
 .radio-outer-circle {
-	border: 1px solid #377ceb;
+	border: 1px solid red;
 	background-color: rgb(50, 50, 50);
 	border-radius: 50%;
 	width: 18px;
@@ -25,7 +25,7 @@
 
 /* Outer Circle Border Color (Default) */
 .radio-outer-circle.border-color-gray-100 {
-	border-color: #377ceb;
+	border-color: red;
 }
 
 /* Inner Circle */
@@ -37,5 +37,5 @@
 
 /* Inner Circle Background Color (Default) */
 .radio-inner-circle.bg-color-gray-100 {
-	background-color: #377ceb;
+	background-color: red;
 }
