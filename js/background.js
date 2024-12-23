@@ -41,45 +41,19 @@ chrome.tabs.onUpdated.addListener((tabId, _, tab) => {
         currentVideoBookmarksWithFrames = null;
 
         activeTabIsReadyAndUpdated = false
-        
-        chrome.tabs.sendMessage(tabId, {
-            type: "tab-updated-new-video",
-            videoId,
-            videoType: isYouTubeFullVideo ? "watch" : "shorts",
-            activeTab: tab,
-        }, {}, () => {
-            activeTabIsReadyAndUpdated = true
+
+        waitForContentScriptWithInterval(tabId, () => {
+            chrome.tabs.sendMessage(tabId, {
+                type: "tab-updated-new-video",
+                videoId,
+                videoType: isYouTubeFullVideo ? "watch" : "shorts",
+                activeTab: tab,
+            }, {}, () => {
+                activeTabIsReadyAndUpdated = true
+            })
         });
     }
 });
-
-/**
- * @description Sends a message to contentScript.js that will eventually give it the captured visual frames of the different bookmarked timestamps for the current video. This is sent back to popup.js to display these frames.
- * @param {Function} sendResponse Chrome has this weird system for sending responses back with async/await functions instead of just returning the response so the only way I got this to properly work was doing it this way by passing in "sendResponse". Got this idea from a StackOverflow answer here: https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
- */
-const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
-    const activeTab = await getActiveTab();
-    const tabId = activeTab.id;
-
-    // Wait for the tab to be ready
-    // TODO: May have to investigate this later to fix the big background bug.
-    // await waitForTabToBeReady();
-
-    chrome.tabs.sendMessage(
-        tabId,
-        { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames },
-        {},
-        (response) => {
-            currentVideoBookmarksWithFrames = response;
-
-            if (chrome.runtime.lastError) {
-                console.error("Error sending message to tab:", chrome.runtime.lastError.message);
-            } else {
-                sendResponse(response);
-            }
-        },
-    );
-};
 
 /**
  * @description Get the active tab.
@@ -110,27 +84,28 @@ const getYouTubeShortsVideoId = (url) => {
     return shortsId;
 };
 
-/**
- * @description Wait for the specified tab to be ready
- * @param {number} tabId - The ID of the tab to wait for.
- * @returns {Promise} Resolves when the tab is ready.
- */
-function waitForTabToBeReady(tabId) {
-    return new Promise((resolve, reject) => {
-        const checkInterval = 100; // Check every 100ms
-        const timeout = 20000; // Wait up to 20 seconds
+const waitForContentScriptWithInterval = (tabId, callback) => {
+    // Set up a variable to track the interval ID
+    const intervalId = setInterval(() => {
+        chrome.tabs.sendMessage(
+            tabId,
+            { type: "check-ready" }, // Message to check readiness
+            (response) => {
+                console.log(response)
 
-        let elapsedTime = 0;
+                if (chrome.runtime.lastError || !response?.ready) {
+                    console.log('ERROR')
+                    console.log(response)
+                    // Content script is not ready yet, continue polling
+                    return;
+                }
 
-        const interval = setInterval(() => {
-            if (activeTabIsReadyAndUpdated) {
-                clearInterval(interval);
-                resolve();
-            } else if (elapsedTime >= timeout) {
-                clearInterval(interval);
-                reject(new Error("Tab is not ready within the timeout period"));
+                // Content script is ready, clear the interval
+                clearInterval(intervalId);
+
+                // Proceed with the actual message
+                callback();
             }
-            elapsedTime += checkInterval;
-        }, checkInterval);
-    });
+        );
+    }, 100); // Check every 100ms
 }

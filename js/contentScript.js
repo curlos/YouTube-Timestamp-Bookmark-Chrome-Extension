@@ -25,6 +25,10 @@ let userSettings = null;
  * @returns {Array<Object>}
  */
 const fetchBookmarks = async () => {
+    if (!currentVideoId) {
+        await getCurrentVideoId()
+    }
+
     const obj = await chrome.storage.sync.get(currentVideoId);
     currentVideoBookmarks = obj[currentVideoId] ? JSON.parse(obj[currentVideoId]).bookmarks : [];
     currentVideoFullObj = obj[currentVideoId];
@@ -164,6 +168,8 @@ chrome.runtime.onMessage.addListener(async (obj) => {
     }
 
     switch (type) {
+        case "check-ready":
+            return { ready: true }
         case "tab-updated-new-video":
             // Reset the global videos each time we land on a new video to prevent potential overlap of global variables.
             resetGlobalVariables();
@@ -209,6 +215,8 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             if (!videoElem) {
                 videoElem = document.getElementsByClassName("video-stream")[0];
             }
+
+            await waitForVideoToBeReady(videoElem)
 
             const timestampBeforeCapturing = videoElem.currentTime;
 
@@ -294,6 +302,50 @@ const resetGlobalVariables = () => {
     currentVideoBookmarks = [];
     currentVideoFullObj = null;
     userSettings = null;
+};
+
+const getCurrentVideoId = async () => {
+    const currentUrl = window.location.href
+    const isYouTubeFullVideo = currentUrl && currentUrl.includes("youtube.com/watch");
+    const isYouTubeShortsVideo = currentUrl && currentUrl.includes("youtube.com/shorts");
+    const isYouTubeVideo = isYouTubeFullVideo || isYouTubeShortsVideo;
+
+    if (isYouTubeVideo) {
+        const queryParameters = currentUrl.split("?")[1];
+        const urlParameters = new URLSearchParams(queryParameters);
+        const videoId = isYouTubeFullVideo ? urlParameters.get("v") : getYouTubeShortsVideoId(currentUrl);
+
+        currentVideoId = videoId
+    } else {
+        currentVideoId = ""
+    }
+}
+
+/**
+ * @description Checks if a video element exists and is ready for playback. Resolves when the video is ready.
+ * @param {HTMLVideoElement} videoElement - The video element to check.
+ * @returns {Promise} - A promise that resolves when the video is ready for playback.
+ */
+const waitForVideoToBeReady = (videoElement) => {
+    return new Promise((resolve, reject) => {
+        if (!videoElement) {
+            reject("Video element not provided");
+            return;
+        }
+
+        // If the video is already ready, resolve immediately
+        if (videoElement.readyState >= 2) {
+            resolve();
+            return;
+        }
+
+        // Listen for the "loadeddata" event as a backup trigger for readiness
+        videoElement.addEventListener("loadeddata", () => {
+            if (videoElement.readyState >= 2) {
+                resolve();
+            }
+        }, { once: true });
+    });
 };
 
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.

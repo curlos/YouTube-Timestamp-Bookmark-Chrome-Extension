@@ -139,3 +139,29 @@ const getYouTubeShortsVideoId = (url) => {
     const shortsId = match ? match[1] : null; // Exclude query params
     return shortsId;
 };
+
+const waitForContentScriptWithInterval = (tabId, callback) => {
+    // Set up a variable to track the interval ID
+    const intervalId = setInterval(() => {
+        chrome.tabs.sendMessage(
+            tabId,
+            { type: "check-ready" }, // Message to check readiness
+            (response) => {
+                console.log(response)
+
+                if (chrome.runtime.lastError || !response?.ready) {
+                    console.log('ERROR')
+                    console.log(response)
+                    // Content script is not ready yet, continue polling
+                    return;
+                }
+
+                // Content script is ready, clear the interval
+                clearInterval(intervalId);
+
+                // Proceed with the actual message
+                callback();
+            }
+        );
+    }, 100); // Check every 100ms
+}

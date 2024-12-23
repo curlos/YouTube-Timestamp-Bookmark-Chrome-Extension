@@ -33,20 +33,22 @@ document.onreadystatechange = async () => {
             renderSidebarModalWithVideos();
             renderSettingsModalContent();
 
-            setCapturedFramesAndRender();
+            waitForContentScriptWithInterval(activeTab.id, () => {
+                setCapturedFramesAndRender({ useWaitForContentScriptWithInterval: false });
 
-            state.video.intervalId = setInterval(() => {
-                chrome.tabs.sendMessage(
-                    state.activeTab.id,
-                    { type: "content-get-current-video-time-and-duration" },
-                    {},
-                    (videoCurrentTimeAndDuration) => {
-                        const { currentTime, duration } = videoCurrentTimeAndDuration
-                        state.video.currentTime = currentTime
-                        state.video.duration = duration
-                    },
-                );
-            }, 100)
+                state.video.intervalId = setInterval(() => {
+                    chrome.tabs.sendMessage(
+                        state.activeTab.id,
+                        { type: "content-get-current-video-time-and-duration" },
+                        {},
+                        (videoCurrentTimeAndDuration) => {
+                            const { currentTime, duration } = videoCurrentTimeAndDuration
+                            state.video.currentTime = currentTime
+                            state.video.duration = duration
+                        },
+                    );
+                }, 100)
+            })
         } else {
             // If it's not a YouTube video, then render everything but the list of bookmarks for a specific video.
             renderLeftMenuButton();
