@@ -52,6 +52,9 @@ export const renderSettingsModalContent = async () => {
     if (!state.userSettings) {
         const defaultUserSettings = {
             captureFrames: true,
+            sortBy: "Most Recently Updated",
+            showBookmarksProgressBar: true,
+            scrollNextBookmarkIntoView: true
         };
 
         await chrome.storage.sync.set({
@@ -61,19 +64,21 @@ export const renderSettingsModalContent = async () => {
         await fetchUserSettings();
     }
 
-    renderCaptureFramesCheckbox()
     renderSortByOptions()
+    renderCheckboxCaptureFrames()
+    renderCheckboxShowBookmarksProgressBar()
 };
 
-const renderCaptureFramesCheckbox = () => {
-    const captureFramesCheckbox = document.getElementById("capture-frames-checkbox");
-    captureFramesCheckbox.checked = state.userSettings.captureFrames ? true : false;
+const renderCheckboxCaptureFrames = () => {
+    const checkboxCaptureFramesElement = document.getElementById("checkbox-capture-frames");
+    checkboxCaptureFramesElement.checked = state.userSettings.captureFrames ? true : false;
 
-    captureFramesCheckbox.addEventListener("click", async (e) => {
+    checkboxCaptureFramesElement.addEventListener("click", async (e) => {
         const isChecked = e.target.checked;
 
         await chrome.storage.sync.set({
             userSettings: JSON.stringify({
+                ...state.userSettings,
                 captureFrames: isChecked,
             }),
         });
@@ -88,6 +93,26 @@ const renderCaptureFramesCheckbox = () => {
             await renderBookmarkElementsForCurrentVideo();
         }
 
+        toggleSettingsSidebarModal()
+    });
+}
+
+const renderCheckboxShowBookmarksProgressBar = () => {
+    const checkboxShowBookmarksProgressBarElement = document.getElementById("checkbox-show-bookmarks-progress-bar");
+    checkboxShowBookmarksProgressBarElement.checked = state.userSettings.showBookmarksProgressBar ? true : false;
+
+    checkboxShowBookmarksProgressBarElement.addEventListener("click", async (e) => {
+        const isChecked = e.target.checked;
+
+        await chrome.storage.sync.set({
+            userSettings: JSON.stringify({
+                ...state.userSettings,
+                showBookmarksProgressBar: isChecked,
+            }),
+        });
+
+        await fetchUserSettings();
+        await renderBookmarkElementsForCurrentVideo();
         toggleSettingsSidebarModal()
     });
 }

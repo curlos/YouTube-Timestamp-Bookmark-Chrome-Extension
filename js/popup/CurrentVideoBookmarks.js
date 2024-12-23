@@ -283,10 +283,13 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
 
     addTimestampControlsAndFrame()
     addFormWithTextareaAndButtons()
-    addProgressBar()
+
+    if (state.userSettings.showBookmarksProgressBar) {
+        addProgressBar()
+    }
 
     showCapturedFrames && newBookmarkElement.appendChild(timestampImgElement);
-    newBookmarkElement.appendChild(progressContainer);
+    state.userSettings.showBookmarksProgressBar && newBookmarkElement.appendChild(progressContainer);
     newBookmarkElement.appendChild(newBookmarkBottomWrapperElement);
     newBookmarkElement.appendChild(noteElement);
     newBookmarkElement.appendChild(formElement);
