@@ -67,6 +67,7 @@ export const renderSettingsModalContent = async () => {
     renderSortByOptions()
     renderCheckboxCaptureFrames()
     renderCheckboxShowBookmarksProgressBar()
+    renderCheckboxScrollNextBookmarkIntoView()
 };
 
 const renderCheckboxCaptureFrames = () => {
@@ -108,6 +109,26 @@ const renderCheckboxShowBookmarksProgressBar = () => {
             userSettings: JSON.stringify({
                 ...state.userSettings,
                 showBookmarksProgressBar: isChecked,
+            }),
+        });
+
+        await fetchUserSettings();
+        await renderBookmarkElementsForCurrentVideo();
+        toggleSettingsSidebarModal()
+    });
+}
+
+const renderCheckboxScrollNextBookmarkIntoView = () => {
+    const checkboxScrollNextBookmarkIntoViewElement = document.getElementById("checkbox-scroll-next-bookmark-into-view");
+    checkboxScrollNextBookmarkIntoViewElement.checked = state.userSettings.scrollNextBookmarkIntoView ? true : false;
+
+    checkboxScrollNextBookmarkIntoViewElement.addEventListener("click", async (e) => {
+        const isChecked = e.target.checked;
+
+        await chrome.storage.sync.set({
+            userSettings: JSON.stringify({
+                ...state.userSettings,
+                scrollNextBookmarkIntoView: isChecked,
             }),
         });
 

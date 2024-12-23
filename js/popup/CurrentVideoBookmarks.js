@@ -258,7 +258,7 @@ export const addNewBookmarkElem = async (bookmarkListElem, bookmark, dataUrl, is
                 const notTheLastBookmark = index !== bookmarksWithProgress.length - 1
 
                 // Scroll the next bookmark into view once the current one finishes.
-                if (bookmarkJustFinished && notTheLastBookmark) {
+                if (bookmarkJustFinished && notTheLastBookmark && state.userSettings.scrollNextBookmarkIntoView) {
                     const nextBookmarkElement = state.bookmarkElements[index + 1]
                     
                     nextBookmarkElement.scrollIntoView({
