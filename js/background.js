@@ -84,6 +84,30 @@ const getYouTubeShortsVideoId = (url) => {
     return shortsId;
 };
 
+/**
+ * @description Sends a message to contentScript.js that will eventually give it the captured visual frames of the different bookmarked timestamps for the current video. This is sent back to popup.js to display these frames.
+ * @param {Function} sendResponse Chrome has this weird system for sending responses back with async/await functions instead of just returning the response so the only way I got this to properly work was doing it this way by passing in "sendResponse". Got this idea from a StackOverflow answer here: https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
+ */
+const getCurrentVideoBookmarksWithFrames = async (sendResponse) => {
+    const activeTab = await getActiveTab();
+
+    waitForContentScriptWithInterval(activeTab.id, () => {
+        chrome.tabs.sendMessage(
+            activeTab.id,
+            { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames },
+            {},
+            (response) => {
+                currentVideoBookmarksWithFrames = response;
+                if (chrome.runtime.lastError) {
+                    console.error("Error sending message to tab:", chrome.runtime.lastError.message);
+                } else {
+                    sendResponse(response);
+                }
+            },
+        );
+    })
+};
+
 const waitForContentScriptWithInterval = (tabId, callback) => {
     // Set up a variable to track the interval ID
     const intervalId = setInterval(() => {

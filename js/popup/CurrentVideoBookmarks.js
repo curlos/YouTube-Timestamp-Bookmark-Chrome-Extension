@@ -4,29 +4,15 @@ import { handleFilteredBookmarks, fetchBookmarks } from './helpers.js'
 /**
  * @description Send the message to background.js that will then send a message to contentScript.js to get the captured frames of the current video at the specified bookmark timestamps and re-render the list of bookmarks.
  */
-export const setCapturedFramesAndRender = ({ useWaitForContentScriptWithInterval = true }) => {
-    const getCurrentVideoBookmarksWithFrames = () => {
-        chrome.tabs.sendMessage(
-            state.activeTab.id,
-            { type: "content-get-current-video-bookmarks-with-frames", currentVideoBookmarksWithFrames: state.currentVideoBookmarksWithFrames },
-            {},
-            async (currentVideoBookmarksWithFrames) => {
-                state.currentVideoBookmarksWithFrames = currentVideoBookmarksWithFrames;
-                state.currentVideoBookmarks = currentVideoBookmarksWithFrames;
-    
-                state.currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
-    
-                await renderBookmarkElementsForCurrentVideo();
-                
-            },
-        )
-    }
-
-    if (useWaitForContentScriptWithInterval) {
-        waitForContentScriptWithInterval(state.activeTab.id, getCurrentVideoBookmarksWithFrames);
-    } else {
-        getCurrentVideoBookmarksWithFrames()
-    }
+export const setCapturedFramesAndRender = () => {
+    chrome.runtime.sendMessage(
+        { type: "background-get-current-video-bookmarks-with-frames" },
+        async (currentVideoBookmarksWithFrames) => {
+            state.currentVideoBookmarks = currentVideoBookmarksWithFrames;
+            state.currentVideoBookmarksWithDataUrlByTime = arrayToObjectByKey(currentVideoBookmarksWithFrames, "time", true);
+            await renderBookmarkElementsForCurrentVideo();
+        },
+    );
 };
 
 /**

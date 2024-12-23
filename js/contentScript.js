@@ -112,7 +112,7 @@ const addBookmarkButtonToVideo = async () => {
 
     if (currentVideoId) {
         if (!videoElem) {
-            videoElem = document.getElementsByClassName("video-stream")[0];
+            videoElem = await getAndWaitForVideoToExist()
         }
 
         const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
@@ -213,7 +213,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             await fetchBookmarks();
 
             if (!videoElem) {
-                videoElem = document.getElementsByClassName("video-stream")[0];
+                videoElem = await getAndWaitForVideoToExist()
             }
 
             await waitForVideoToBeReady(videoElem)
@@ -270,7 +270,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
             return newCurrentVideoBookmarksWithFrames;
         case "content-get-current-video-time-and-duration":
             if (!videoElem) {
-                videoElem = document.getElementsByClassName("video-stream")[0];
+                videoElem = await getAndWaitForVideoToExist()
             }
 
             const { currentTime, duration } = videoElem
@@ -320,6 +320,40 @@ const getCurrentVideoId = async () => {
         currentVideoId = ""
     }
 }
+
+/**
+ * @description Waits for a video element with the class "video-stream" to exist in the DOM.
+ * @returns {Promise<HTMLVideoElement>} Resolves with the video element once it exists, or rejects after 5 seconds if not found.
+ */
+const getAndWaitForVideoToExist = async () => {
+    return new Promise((resolve, reject) => {
+        const timeout = 5000; // Timeout after 5 seconds
+        const checkInterval = 100; // Check every 100ms
+
+        // Check if the video element already exists
+        const videoElem = document.getElementsByClassName("video-stream")[0];
+        if (videoElem) {
+            resolve(videoElem); // Resolve immediately if it exists
+            return;
+        }
+
+        // Set up a timeout to reject the promise after 5 seconds
+        const timeoutId = setTimeout(() => {
+            clearInterval(intervalId); // Stop the interval if the timeout occurs
+            reject(new Error("Video element not found within 5 seconds."));
+        }, timeout);
+
+        // Set up an interval to check for the video element
+        const intervalId = setInterval(() => {
+            const videoElem = document.getElementsByClassName("video-stream")[0];
+            if (videoElem) {
+                clearInterval(intervalId); // Stop checking once the video element is found
+                clearTimeout(timeoutId); // Clear the timeout to prevent rejection
+                resolve(videoElem); // Resolve with the video element
+            }
+        }, checkInterval);
+    });
+};
 
 /**
  * @description Checks if a video element exists and is ready for playback. Resolves when the video is ready.

@@ -34,7 +34,7 @@ document.onreadystatechange = async () => {
             renderSettingsModalContent();
 
             waitForContentScriptWithInterval(activeTab.id, () => {
-                setCapturedFramesAndRender({ useWaitForContentScriptWithInterval: false });
+                setCapturedFramesAndRender();
 
                 state.video.intervalId = setInterval(() => {
                     chrome.tabs.sendMessage(
