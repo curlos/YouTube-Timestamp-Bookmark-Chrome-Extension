@@ -1,37 +1,35 @@
 {
-    "name": "YouTube Video Timestamp Bookmarks",
-    "version": "0.1.0",
-    "description": "Saving timestamps in YT videos",
-    "permissions": ["storage", "tabs"],
-    "host_permissions": ["https://*.youtube.com/*"],
-    "background": {
-      "service_worker": "js/background.js"
-    },
-    "content_scripts": [
-      {
-        "matches": ["https://*.youtube.com/*"],
-        "js": ["js/utils.js", "js/contentScript.js"],
-        "css": ["css/contentScript.css"]
-      }
-    ],
-    "web_accessible_resources": [
-      {
-        "resources": [
-          "assets/*"
-        ],
-        "matches": ["https://*.youtube.com/*"]
-      }
-    ],
-    "action": {
-      "default_icon": {
-        "16": "assets/bookmark.png",
-        "24": "assets/bookmark.png",
-        "32": "assets/bookmark.png",
-        "48": "assets/bookmark.png",
-        "128": "assets/bookmark.png"
-      },
-      "default_title": "YouTube Video Timestamp Bookmark",
-      "default_popup": "popup.html"
-    },
-    "manifest_version": 3
-  }
+	"name": "YouTube Video Timestamp Bookmarks",
+	"version": "0.1.0",
+	"description": "Saving timestamps in YT videos",
+	"permissions": ["storage", "tabs"],
+	"host_permissions": ["https://*.youtube.com/*"],
+	"background": {
+		"service_worker": "js/background.js"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://*.youtube.com/*"],
+			"js": ["js/utils.js", "js/contentScript.js"],
+			"css": ["css/contentScript.css"]
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["assets/*"],
+			"matches": ["https://*.youtube.com/*"]
+		}
+	],
+	"action": {
+		"default_icon": {
+			"16": "assets/bookmark.png",
+			"24": "assets/bookmark.png",
+			"32": "assets/bookmark.png",
+			"48": "assets/bookmark.png",
+			"128": "assets/bookmark.png"
+		},
+		"default_title": "YouTube Video Timestamp Bookmark",
+		"default_popup": "popup.html"
+	},
+	"manifest_version": 3
+}

@@ -1,23 +1,23 @@
-import { state } from "./state.js";
-import { renderSidebarModalWithVideos } from "./videosWithBookmarks.js";
-import { renderBookmarkElementsForCurrentVideo } from "./currentVideoBookmarks.js";
+import { state } from './state.js';
+import { renderSidebarModalWithVideos } from './videosWithBookmarks.js';
+import { renderBookmarkElementsForCurrentVideo } from './currentVideoBookmarks.js';
 
 /**
  * @description Get all the videos with bookmarks - will exclude the "userSettings" key-value pair since that's not a video.
  */
 export const getAllVideosWithBookmarks = () => {
-    return new Promise((resolve, reject) => {
-        chrome.storage.sync.get(null, function (items) {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-            } else {
-                const { userSettings, ...itemsWithoutUserSettings } = items
+	return new Promise((resolve, reject) => {
+		chrome.storage.sync.get(null, function (items) {
+			if (chrome.runtime.lastError) {
+				reject(chrome.runtime.lastError);
+			} else {
+				const { userSettings, ...itemsWithoutUserSettings } = items;
 
-                state.allVideosWithBookmarks = itemsWithoutUserSettings;
-                resolve(items);
-            }
-        });
-    });
+				state.allVideosWithBookmarks = itemsWithoutUserSettings;
+				resolve(items);
+			}
+		});
+	});
 };
 
 /**
@@ -25,31 +25,31 @@ export const getAllVideosWithBookmarks = () => {
  * @returns {Array<Object>}
  */
 export const fetchBookmarks = async () => {
-    const obj = await chrome.storage.sync.get(state.currentVideoId);
-    const jsonObj = obj[state.currentVideoId] ? JSON.parse(obj[state.currentVideoId]) : {};
+	const obj = await chrome.storage.sync.get(state.currentVideoId);
+	const jsonObj = obj[state.currentVideoId] ? JSON.parse(obj[state.currentVideoId]) : {};
 
-    const { bookmarks = [] } = jsonObj;
+	const { bookmarks = [] } = jsonObj;
 
-    state.currentVideoBookmarks = bookmarks;
-    state.currentVideoFullObj = jsonObj;
+	state.currentVideoBookmarks = bookmarks;
+	state.currentVideoFullObj = jsonObj;
 };
 
 /**
  * @description Get the user settings from Chrome's Storage.
  */
 export const fetchUserSettings = async () => {
-    const obj = await chrome.storage.sync.get("userSettings");
-    const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj["userSettings"]) : {};
-    state.userSettings = chromeStorageUserSettingsJsonObj;
+	const obj = await chrome.storage.sync.get('userSettings');
+	const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj['userSettings']) : {};
+	state.userSettings = chromeStorageUserSettingsJsonObj;
 };
 
 /**
  * @description After we have made a change to the bookmarks (by adding or deleting one or more of them), running this function will re-fetch the bookmarks and re-render any elements that use these bookmarks so that we use the latest information and views.
  */
 export const handleFilteredBookmarks = async () => {
-    await fetchBookmarks();
-    await getAllVideosWithBookmarks();
+	await fetchBookmarks();
+	await getAllVideosWithBookmarks();
 
-    renderSidebarModalWithVideos();
-    renderBookmarkElementsForCurrentVideo();
+	renderSidebarModalWithVideos();
+	renderBookmarkElementsForCurrentVideo();
 };

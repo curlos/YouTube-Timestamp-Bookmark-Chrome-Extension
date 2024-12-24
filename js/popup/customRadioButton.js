@@ -42,4 +42,4 @@ export const createCustomRadioButton = ({
 	labelElement.appendChild(document.createTextNode(label));
 
 	return labelElement;
-}
+};

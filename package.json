@@ -1,18 +1,18 @@
 {
-  "name": "youtube-timestamp-bookmark-chrome-extension",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext js,css,json --report-unused-disable-directives --max-warnings 0",
-    "formatAllFilesPrettier": "npx prettier --write '**/*.{js,css,json}'"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "eslint": "^9.17.0",
-    "prettier": "^3.4.2"
-  }
+	"name": "youtube-timestamp-bookmark-chrome-extension",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"lint": "eslint . --ext js,css,json --report-unused-disable-directives --max-warnings 0",
+		"formatAllFilesPrettier": "npx prettier --write '**/*.{js,css,json}'"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"eslint": "^9.17.0",
+		"prettier": "^3.4.2"
+	}
 }
