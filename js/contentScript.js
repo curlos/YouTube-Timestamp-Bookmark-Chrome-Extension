@@ -86,6 +86,7 @@ const getThumbnailUrl = () => {
 
         for (let scriptJsonElem of scriptJsonElemList) {
             if (scriptJsonElem.textContent) {
+                // TODO: Uncaught (in promise) SyntaxError: Bad escaped character in JSON at position 194 (line 1 column 195) for this video "https://www.youtube.com/watch?v=UnKW7bL8HEI"
                 const scriptJsonObj = JSON.parse(scriptJsonElem.textContent);
                 const { thumbnailUrl: thumbnailUrlArray } = scriptJsonObj || {};
 

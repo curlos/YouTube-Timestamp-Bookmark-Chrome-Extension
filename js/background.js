@@ -115,11 +115,7 @@ const waitForContentScriptWithInterval = (tabId, callback) => {
             tabId,
             { type: "check-ready" }, // Message to check readiness
             (response) => {
-                console.log(response)
-
                 if (chrome.runtime.lastError || !response?.ready) {
-                    console.log('ERROR')
-                    console.log(response)
                     // Content script is not ready yet, continue polling
                     return;
                 }
