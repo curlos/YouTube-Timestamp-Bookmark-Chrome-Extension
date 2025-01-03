@@ -20,7 +20,10 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#videos-with-bookmarks">Videos With Bookmarks</a></li>
+    <li><a href="#bookmarks-for-this-video">Bookmarks For This Video</a></li>
+    <li><a href="#settings">Settings</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
