@@ -8,3 +8,11 @@
 	display: flex !important;
 	align-items: center !important;
 }
+
+.left-controls-part-elem {
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	cursor: pointer;
+}

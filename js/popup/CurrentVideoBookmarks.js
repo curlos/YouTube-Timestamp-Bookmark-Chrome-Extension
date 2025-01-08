@@ -125,6 +125,10 @@ export const addNewBookmarkElem = async (
 	const noteElement = document.createElement('div');
 	const progressContainer = document.createElement('div');
 
+	const useParts = true
+	const { startTime } = getBookmarkCurrentAndEndTime(state.currentVideoBookmarks, state.video.currentTime, bookmark, index)
+	const videoTimeToPlay = useParts ? startTime : bookmark.time
+
 	const toggleEditNoteForm = () => {
 		formElement.classList.toggle('show-edit-form');
 		noteElement.classList.toggle('hide-note');
@@ -139,7 +143,7 @@ export const addNewBookmarkElem = async (
 		setControlBookmarkSVGElem(
 			'play',
 			() => {
-				handlePlayVideo(bookmark.time);
+				handlePlayVideo(videoTimeToPlay);
 			},
 			controlsElement
 		);
@@ -162,10 +166,10 @@ export const addNewBookmarkElem = async (
 	};
 
 	const addTimestampControlsAndFrame = () => {
-		bookmarkTitleElement.textContent = formatTime(Math.floor(bookmark.time));
+		updateBookmarkTimestamp()
 		bookmarkTitleElement.className = 'bookmark-title';
 		bookmarkTitleElement.addEventListener('click', () => {
-			handlePlayVideo(bookmark.time);
+			handlePlayVideo(videoTimeToPlay);
 		});
 
 		controlsElement.className = 'bookmark-controls';
@@ -174,7 +178,7 @@ export const addNewBookmarkElem = async (
 		showCapturedFrames && (timestampImgElement.className = 'timestamp-img');
 		showCapturedFrames &&
 			timestampImgElement.addEventListener('click', () => {
-				handlePlayVideo(bookmark.time);
+				handlePlayVideo(videoTimeToPlay);
 			});
 
 		setControlElems(bookmark, controlsElement, toggleEditNoteForm);
@@ -295,10 +299,25 @@ export const addNewBookmarkElem = async (
 			}
 
 			updateProgress(progress);
+			updateBookmarkTimestamp()
+			
 		}, 100);
 
 		state.bookmarkProgressBarIntervalIds.push(intervalId);
 	};
+
+	const updateBookmarkTimestamp = () => {
+		const fullBookmarkTime = formatTime(Math.floor(bookmark.time))
+		const { currentTime, endTime } = getBookmarkCurrentAndEndTime(state.currentVideoBookmarks, state.video.currentTime, bookmark, index)
+
+		const currentTimeToUse = Math.min(Math.max(currentTime, 0), endTime)
+
+		const useParts = true
+		const displayedTimestamp = useParts ? `${formatTime(Math.floor(currentTimeToUse))} / ${formatTime(Math.floor(endTime))}` : fullBookmarkTime
+		
+
+		bookmarkTitleElement.innerHTML = `${displayedTimestamp} • Part ${index + 1}/${bookmarksWithProgress.length} <span class="gray-bookmark-time">(${formatTime(Math.floor(bookmark.time))})</span>`;
+	}
 
 	addTimestampControlsAndFrame();
 	addFormWithTextareaAndButtons();

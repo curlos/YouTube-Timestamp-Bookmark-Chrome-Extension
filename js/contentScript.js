@@ -387,8 +387,83 @@ const waitForVideoToBeReady = (videoElement) => {
 	});
 };
 
+/**
+ * @description Monitor the video element on the page for any changes to its current time to visually change the progress bar and timestamp on the page to be for the "part" of the video that we are on.
+ */
+const monitorVideoElement = async () => {
+	await fetchBookmarks()
+
+	if (!videoElem) {
+		videoElem = await getAndWaitForVideoToExist();
+	}
+
+	editVideoProgressBarAndTimeVisually()
+
+	// Add an event listener for the 'timeupdate' event
+	videoElem.addEventListener('timeupdate', () => {
+		editVideoProgressBarAndTimeVisually()
+	});
+
+	// TODO: Possibly add this so that everything updates constantly. Not sure if necessary. Will have to test this out as it could impact performance.
+	// setInterval(() => {
+	// 	editVideoProgressBarAndTimeVisually
+	// }, 100)
+}
+
+/**
+ * @description
+ */
+const editVideoProgressBarAndTimeVisually = () => {
+	const { currentTime, endTime, currentBookmarkIndex } = currentVideoBookmarks && getCurrentBookmarkBasedOnTime(videoElem.currentTime)
+
+	document.querySelector('.ytp-time-current').textContent = formatTime(Math.floor(currentTime))
+	document.querySelector('.ytp-time-duration').textContent = formatTime(Math.floor(endTime))
+
+	const progressBarWidth = document.querySelector('.ytp-progress-bar-container').getBoundingClientRect().width
+	const progressNum = currentTime / endTime
+
+	const currentTimeCircleThumb = document.querySelector('.ytp-scrubber-container')
+	currentTimeCircleThumb.style.transform = `translateX(${progressBarWidth * progressNum}px)`
+
+	const playProgressElem = document.querySelector('.ytp-play-progress')
+	playProgressElem.style.transform = `scaleX(${progressNum})`
+
+	addCurrentBookmarkInfoToLeftControls(currentBookmarkIndex)
+}
+
+const addCurrentBookmarkInfoToLeftControls = (currentBookmarkIndex) => {
+	const totalBookmarksNum = currentVideoBookmarks.length
+
+	let partElem = document.querySelector('.left-controls-part-elem')
+
+	if (!partElem) {
+		partElem = document.createElement('div')
+		partElem.className = 'left-controls-part-elem'
+		partElem.addEventListener('click', async () => {
+			await chrome.runtime.sendMessage({ type: 'open-popup' });
+		})
+	}
+
+	partElem.innerHTML = `• Part ${currentBookmarkIndex + 1}/${totalBookmarksNum} ${getIconSVG('chevron-right', 'white', '10px','10px')}`
+
+	const ytpLeftControlsElem = document.querySelector('.ytp-left-controls')
+	ytpLeftControlsElem.appendChild(partElem)
+}
+
+const getCurrentBookmarkBasedOnTime = (videoCurrentTime) => {
+	for (let i = 0; i < currentVideoBookmarks.length; i++) {
+		const bookmark = currentVideoBookmarks[i]
+
+		if (bookmark.time > videoCurrentTime) {
+			return getBookmarkCurrentAndEndTime(currentVideoBookmarks, videoCurrentTime, bookmark, i)
+		}
+	}
+}
+
 // TODO: There was something the original creator mentioned regarding this. This should be taken out so that it's not called more than once when landing on a video page.
 addBookmarkButtonToVideo();
+
+monitorVideoElement()
 
 // Send a message to background.js telling it that the contentScript is ready.
 chrome.runtime.sendMessage({ type: 'ready' });

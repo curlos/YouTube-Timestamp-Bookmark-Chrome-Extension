@@ -424,3 +424,7 @@ input:checked + .slider:before {
 	flex-direction: column;
 	gap: 7px;
 }
+
+.gray-bookmark-time {
+	color: gray;
+}
