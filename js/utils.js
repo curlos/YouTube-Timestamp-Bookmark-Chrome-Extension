@@ -17,7 +17,7 @@ async function getActiveTab(sendResponse) {
 }
 
 /**
- * @description Formats a number of seconds into a timestamp string formatted like HH:MM:SS. For example, 300 seconds would be "05:00". 3600 seconds (1 hour) would be 01:00:00.
+ * @description Formats a number of seconds into a timestamp string formatted like H:MM:SS. For example, 300 seconds would be "5:00". 3600 seconds (1 hour) would be "1:00:00".
  * @param {Number} seconds
  * @returns {String}
  */
@@ -27,15 +27,14 @@ const formatTime = (seconds) => {
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const remainingSeconds = seconds % 60;
 
-	// Pad the numbers with leading zeros where necessary
-	const formattedMinutes = String(minutes).padStart(2, '0');
+	// Format the time components
 	const formattedSeconds = String(remainingSeconds).padStart(2, '0');
-
 	if (hours > 0) {
-		const formattedHours = String(hours).padStart(2, '0');
-		return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+		// Hours present, include them in the format
+		return `${hours}:${minutes}:${formattedSeconds}`;
 	} else {
-		return `${formattedMinutes}:${formattedSeconds}`;
+		// No hours, return only minutes and seconds
+		return `${minutes}:${formattedSeconds}`;
 	}
 };
 

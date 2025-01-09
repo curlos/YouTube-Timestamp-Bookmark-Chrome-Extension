@@ -19,6 +19,7 @@ let currentVideoBookmarks = [];
 let currentVideoFullObj = null;
 let activeTab = null;
 let userSettings = null;
+let timestampTextBackToNormal = false
 
 /**
  * @description Fetch the array of bookmarks for the current video. If no bookmarks, will return an empty array.
@@ -397,12 +398,16 @@ const monitorVideoElement = async () => {
 		videoElem = await getAndWaitForVideoToExist();
 	}
 
-	editVideoProgressBarAndTimeVisually()
+	const videoDuration = videoElem.duration
+
+	const handleTimeUpdate = () => {
+		editVideoProgressBarAndTimeVisually(videoDuration)
+	}
+
+	editVideoProgressBarAndTimeVisually(videoDuration)
 
 	// Add an event listener for the 'timeupdate' event
-	videoElem.addEventListener('timeupdate', () => {
-		editVideoProgressBarAndTimeVisually()
-	});
+	videoElem.addEventListener('timeupdate', handleTimeUpdate);
 
 	// TODO: Possibly add this so that everything updates constantly. Not sure if necessary. Will have to test this out as it could impact performance.
 	// setInterval(() => {
@@ -413,7 +418,32 @@ const monitorVideoElement = async () => {
 /**
  * @description Edit the progress bar and timestamp of the main video on the page by adding and editing DOM elements to the page to simulate the video being broken up into smaller parts.
  */
-const editVideoProgressBarAndTimeVisually = () => {
+const editVideoProgressBarAndTimeVisually = (videoDuration) => {
+	const lastBookmarkTime = currentVideoBookmarks && currentVideoBookmarks[currentVideoBookmarks.length - 1] && currentVideoBookmarks[currentVideoBookmarks.length - 1].time
+
+	// When we have gone through all of the bookmarks, then clean up the timestamp elements and return them back to normal.
+	if (lastBookmarkTime && lastBookmarkTime < videoElem.currentTime) {
+		if (timestampTextBackToNormal) {
+			return
+		}
+
+		// Edit the content
+		document.querySelector('.ytp-time-current').textContent = formatTime(Math.floor(videoElem.currentTime))
+		document.querySelector('.ytp-time-duration').textContent = formatTime(Math.floor(videoDuration))
+
+		const partElem = document.querySelector('.left-controls-part-elem')
+		
+		if (partElem) {
+			partElem.parentElement.removeChild(partElem)
+		}
+
+		timestampTextBackToNormal = true
+
+		return
+	}
+
+	timestampTextBackToNormal = false
+
 	const { currentTime, endTime, currentBookmarkIndex } = currentVideoBookmarks && getCurrentBookmarkInfoBasedOnTime(videoElem.currentTime)
 
 	document.querySelector('.ytp-time-current').textContent = formatTime(Math.floor(currentTime))
