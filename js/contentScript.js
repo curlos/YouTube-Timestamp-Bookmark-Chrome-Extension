@@ -411,10 +411,10 @@ const monitorVideoElement = async () => {
 }
 
 /**
- * @description
+ * @description Edit the progress bar and timestamp of the main video on the page by adding and editing DOM elements to the page to simulate the video being broken up into smaller parts.
  */
 const editVideoProgressBarAndTimeVisually = () => {
-	const { currentTime, endTime, currentBookmarkIndex } = currentVideoBookmarks && getCurrentBookmarkBasedOnTime(videoElem.currentTime)
+	const { currentTime, endTime, currentBookmarkIndex } = currentVideoBookmarks && getCurrentBookmarkInfoBasedOnTime(videoElem.currentTime)
 
 	document.querySelector('.ytp-time-current').textContent = formatTime(Math.floor(currentTime))
 	document.querySelector('.ytp-time-duration').textContent = formatTime(Math.floor(endTime))
@@ -431,6 +431,10 @@ const editVideoProgressBarAndTimeVisually = () => {
 	addCurrentBookmarkInfoToLeftControls(currentBookmarkIndex)
 }
 
+/**
+ * @description Add the current part info to the YouTube video player's left controls. This will add a piece of text saying "Part X/X". When that's clicked, it will open the popup and automatically scroll to the part (assuming the automatic scroll is turned on).
+ * @param {Number} currentBookmarkIndex 
+ */
 const addCurrentBookmarkInfoToLeftControls = (currentBookmarkIndex) => {
 	const totalBookmarksNum = currentVideoBookmarks.length
 
@@ -450,7 +454,12 @@ const addCurrentBookmarkInfoToLeftControls = (currentBookmarkIndex) => {
 	ytpLeftControlsElem.appendChild(partElem)
 }
 
-const getCurrentBookmarkBasedOnTime = (videoCurrentTime) => {
+/**
+ * @description Go through all of the bookmarks and find the first bookmark that has a time greater than the video's current time. This is the "current" bookmark. Then, for this bookmark get it's "current" and "end" time based on a couple of different factors like the video's current time, the previous bookmark, etc.
+ * @param {Number} videoCurrentTime 
+ * @returns {Object}
+ */
+const getCurrentBookmarkInfoBasedOnTime = (videoCurrentTime) => {
 	for (let i = 0; i < currentVideoBookmarks.length; i++) {
 		const bookmark = currentVideoBookmarks[i]
 

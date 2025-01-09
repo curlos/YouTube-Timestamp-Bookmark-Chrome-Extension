@@ -299,20 +299,25 @@ export const addNewBookmarkElem = async (
 			}
 
 			updateProgress(progress);
-			updateBookmarkTimestamp()
+
+			if (useParts) {
+				// This updates the bookmark timestamp every X milliseconds because the timestamp number will change contionously if "useParts" is true.
+				updateBookmarkTimestamp()
+			}
 			
 		}, 100);
 
 		state.bookmarkProgressBarIntervalIds.push(intervalId);
 	};
 
+	/**
+	 * @description Update the "bookmark-title" elem with the correct displayed timestamp.
+	 */
 	const updateBookmarkTimestamp = () => {
 		const fullBookmarkTime = formatTime(Math.floor(bookmark.time))
 		const { currentTime, endTime } = getBookmarkCurrentAndEndTime(state.currentVideoBookmarks, state.video.currentTime, bookmark, index)
 
 		const currentTimeToUse = Math.min(Math.max(currentTime, 0), endTime)
-
-		const useParts = true
 		const displayedTimestamp = useParts ? `${formatTime(Math.floor(currentTimeToUse))} / ${formatTime(Math.floor(endTime))}` : fullBookmarkTime
 		
 

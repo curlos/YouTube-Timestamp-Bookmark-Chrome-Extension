@@ -169,6 +169,14 @@ const waitForContentScriptWithInterval = (tabId, callback) => {
 };
 
 
+/**
+ * @description Get a bookmark's (or part's) "start", "current", and "end" times as well as the part's index. This is necessary info that will tell us what to "visually" display in the video's progress bar as well as in the timestamp. Also used for the popup's bookmarks. This is extremely crucial in mimicing the "splitting" of the video into parts without actually having a separate video for each part.
+ * @param {Array<Object>} currentVideoBookmarks 
+ * @param {Number} videoCurrentTime 
+ * @param {Object} bookmark 
+ * @param {Number} i 
+ * @returns {Object}
+ */
 const getBookmarkCurrentAndEndTime = (currentVideoBookmarks, videoCurrentTime, bookmark, i) => {
 	const notTheFirstBookmark = i > 0
 	const prevBookmarkTime = (notTheFirstBookmark && currentVideoBookmarks[i - 1] && currentVideoBookmarks[i - 1].time)
