@@ -125,9 +125,8 @@ export const addNewBookmarkElem = async (
 	const noteElement = document.createElement('div');
 	const progressContainer = document.createElement('div');
 
-	const useParts = true
 	const { startTime } = getBookmarkCurrentAndEndTime(state.currentVideoBookmarks, state.video.currentTime, bookmark, index)
-	const videoTimeToPlay = useParts ? startTime : bookmark.time
+	const videoTimeToPlay = state.userSettings.splitVideoIntoParts ? startTime : bookmark.time
 
 	const toggleEditNoteForm = () => {
 		formElement.classList.toggle('show-edit-form');
@@ -300,11 +299,11 @@ export const addNewBookmarkElem = async (
 
 			updateProgress(progress);
 
-			if (useParts) {
-				// This updates the bookmark timestamp every X milliseconds because the timestamp number will change contionously if "useParts" is true.
+			if (state.userSettings.splitVideoIntoParts) {
+				// This updates the bookmark timestamp every X milliseconds because the timestamp number will change contionously if "state.userSettings.splitVideoIntoParts" is true.
 				updateBookmarkTimestamp()
 			}
-			
+
 		}, 100);
 
 		state.bookmarkProgressBarIntervalIds.push(intervalId);
@@ -318,10 +317,10 @@ export const addNewBookmarkElem = async (
 		const { currentTime, endTime } = getBookmarkCurrentAndEndTime(state.currentVideoBookmarks, state.video.currentTime, bookmark, index)
 
 		const currentTimeToUse = Math.min(Math.max(currentTime, 0), endTime)
-		const displayedTimestamp = useParts ? `${formatTime(Math.floor(currentTimeToUse))} / ${formatTime(Math.floor(endTime))}` : fullBookmarkTime
+		const displayedTimestamp = state.userSettings.splitVideoIntoParts ? `${formatTime(Math.floor(currentTimeToUse))} / ${formatTime(Math.floor(endTime))}` : fullBookmarkTime
 		
 
-		bookmarkTitleElement.innerHTML = `${displayedTimestamp} • Part ${index + 1}/${bookmarksWithProgress.length} <span class="gray-bookmark-time">(${formatTime(Math.floor(bookmark.time))})</span>`;
+		bookmarkTitleElement.innerHTML = state.userSettings.splitVideoIntoParts ? `${displayedTimestamp} • Part ${index + 1}/${bookmarksWithProgress.length} <span class="gray-bookmark-time">(${formatTime(Math.floor(bookmark.time))})</span>` : displayedTimestamp;
 	}
 
 	addTimestampControlsAndFrame();

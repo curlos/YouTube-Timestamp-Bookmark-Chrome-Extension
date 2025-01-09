@@ -59,6 +59,7 @@ export const renderSettingsModalContent = async () => {
 			sortBy: 'Most Recently Updated',
 			showBookmarksProgressBar: true,
 			scrollNextBookmarkIntoView: true,
+			splitVideoIntoParts: true,
 		};
 
 		await chrome.storage.sync.set({
@@ -72,6 +73,7 @@ export const renderSettingsModalContent = async () => {
 	renderCheckboxCaptureFrames();
 	renderCheckboxShowBookmarksProgressBar();
 	renderCheckboxScrollNextBookmarkIntoView();
+	renderCheckboxSplitVideoIntoParts()
 };
 
 const renderCheckboxCaptureFrames = () => {
@@ -144,6 +146,34 @@ const renderCheckboxScrollNextBookmarkIntoView = () => {
 	});
 };
 
+const renderCheckboxSplitVideoIntoParts = () => {
+	const checkboxSplitVideoIntoPartsElement = document.getElementById(
+		'checkbox-split-video-into-parts'
+	);
+	checkboxSplitVideoIntoPartsElement.checked = state.userSettings.splitVideoIntoParts ? true : false;
+
+	checkboxSplitVideoIntoPartsElement.addEventListener('click', async (e) => {
+		const isChecked = e.target.checked;
+
+		await chrome.storage.sync.set({
+			userSettings: JSON.stringify({
+				...state.userSettings,
+				splitVideoIntoParts: isChecked,
+			}),
+		});
+
+		// Update the user settings in Content Script so that the "editVideoProgressBarAndTimeVisually" function can use the latest "userSettings.splitVideoIntoParts" value.
+		await chrome.tabs.sendMessage(
+			state.activeTab.id,
+			{ type: 'update-user-settings' }
+		);
+
+		await fetchUserSettings();
+		await renderBookmarkElementsForCurrentVideo();
+		toggleSettingsSidebarModal();
+	});
+};
+
 const renderSortByOptions = async () => {
 	const sortByOptionsElem = document.querySelector('.sort-by-options');
 	sortByOptionsElem.innerHTML = '';
@@ -155,7 +185,7 @@ const renderSortByOptions = async () => {
 	}
 
 	SORT_BY_OPTION_LIST.forEach((sortByOption) => {
-		// // Create multiple radio buttons
+		// Create multiple radio buttons
 		const radio1 = createCustomRadioButton({
 			label: sortByOption,
 			name: sortByOption,

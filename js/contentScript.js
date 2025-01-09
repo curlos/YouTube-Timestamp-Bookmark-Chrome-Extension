@@ -281,6 +281,9 @@ chrome.runtime.onMessage.addListener(async (obj) => {
 				currentTime,
 				duration,
 			};
+		case 'update-user-settings':
+			await fetchUserSettings()
+			break;
 	}
 });
 
@@ -393,6 +396,7 @@ const waitForVideoToBeReady = (videoElement) => {
  */
 const monitorVideoElement = async () => {
 	await fetchBookmarks()
+	await fetchUserSettings();
 
 	if (!videoElem) {
 		videoElem = await getAndWaitForVideoToExist();
@@ -434,7 +438,11 @@ const createFullScreenPartListener = (tempPartElem) => {
 /**
  * @description Edit the progress bar and timestamp of the main video on the page by adding and editing DOM elements to the page to simulate the video being broken up into smaller parts.
  */
-const editVideoProgressBarAndTimeVisually = (videoDuration) => {
+const editVideoProgressBarAndTimeVisually = async (videoDuration) => {
+	if (!userSettings) {
+		await fetchUserSettings()
+	}
+
 	if (!currentVideoBookmarks || currentVideoBookmarks.length === 0) {
 		return
 	}
@@ -442,7 +450,7 @@ const editVideoProgressBarAndTimeVisually = (videoDuration) => {
 	const lastBookmarkTime = currentVideoBookmarks && currentVideoBookmarks[currentVideoBookmarks.length - 1] && currentVideoBookmarks[currentVideoBookmarks.length - 1].time
 
 	// When we have gone through all of the bookmarks, then clean up the timestamp elements and return them back to normal.
-	if (lastBookmarkTime && lastBookmarkTime < videoElem.currentTime) {
+	if (!userSettings.splitVideoIntoParts || lastBookmarkTime && lastBookmarkTime < videoElem.currentTime) {
 		if (timestampTextBackToNormal) {
 			return
 		}
