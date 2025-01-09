@@ -435,6 +435,10 @@ const createFullScreenPartListener = (tempPartElem) => {
  * @description Edit the progress bar and timestamp of the main video on the page by adding and editing DOM elements to the page to simulate the video being broken up into smaller parts.
  */
 const editVideoProgressBarAndTimeVisually = (videoDuration) => {
+	if (!currentVideoBookmarks || currentVideoBookmarks.length === 0) {
+		return
+	}
+
 	const lastBookmarkTime = currentVideoBookmarks && currentVideoBookmarks[currentVideoBookmarks.length - 1] && currentVideoBookmarks[currentVideoBookmarks.length - 1].time
 
 	// When we have gone through all of the bookmarks, then clean up the timestamp elements and return them back to normal.
