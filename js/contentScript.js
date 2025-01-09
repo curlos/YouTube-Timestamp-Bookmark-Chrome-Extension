@@ -409,10 +409,26 @@ const monitorVideoElement = async () => {
 	// Add an event listener for the 'timeupdate' event
 	videoElem.addEventListener('timeupdate', handleTimeUpdate);
 
+	createFullScreenPartListener()
+
 	// TODO: Possibly add this so that everything updates constantly. Not sure if necessary. Will have to test this out as it could impact performance.
 	// setInterval(() => {
 	// 	editVideoProgressBarAndTimeVisually
 	// }, 100)
+}
+
+const createFullScreenPartListener = (tempPartElem) => {
+	const partElem = document.querySelector('.left-controls-part-elem') || tempPartElem
+
+	if (partElem) {
+		document.addEventListener('fullscreenchange', () => {
+		  if (document.fullscreenElement) {
+			partElem.style.fontSize = '20px';
+		  } else {
+			partElem.style.fontSize = '13px';
+		  }
+		});
+	  }
 }
 
 /**
@@ -476,6 +492,8 @@ const addCurrentBookmarkInfoToLeftControls = (currentBookmarkIndex) => {
 		partElem.addEventListener('click', async () => {
 			await chrome.runtime.sendMessage({ type: 'open-popup' });
 		})
+
+		createFullScreenPartListener(partElem)
 	}
 
 	partElem.innerHTML = `• Part ${currentBookmarkIndex + 1}/${totalBookmarksNum} ${getIconSVG('chevron-right', 'white', '10px','10px')}`
