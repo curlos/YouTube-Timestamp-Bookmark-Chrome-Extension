@@ -292,7 +292,7 @@ chrome.runtime.onMessage.addListener(async (obj) => {
  */
 const fetchUserSettings = async () => {
 	const obj = await chrome.storage.sync.get('userSettings');
-	const chromeStorageUserSettingsJsonObj = obj ? JSON.parse(obj['userSettings']) : {};
+	const chromeStorageUserSettingsJsonObj = obj && obj['userSettings'] ? JSON.parse(obj['userSettings']) : {};
 	userSettings = chromeStorageUserSettingsJsonObj;
 };
 
